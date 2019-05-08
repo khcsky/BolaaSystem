@@ -37,7 +37,7 @@ export default {
                     children: [
                         {
                             path: '/index',
-                            subMenuTitle: '项目'
+                            subMenuTitle: '项目管理'
                         }
                     ]
                 },
@@ -81,8 +81,8 @@ export default {
                     icon_code:'&#xe60b',
                     children: [
                         {
-                            path: '/index/repertorymanage',
-                            subMenuTitle: 'table'
+                            path: '/index/plateclassification',
+                            subMenuTitle: '采集管理'
                         }
                     ]
                 },
@@ -92,8 +92,8 @@ export default {
                     icon_code:'&#xe634',
                     children: [
                         {
-                            path: '/index/saleslist',
-                            subMenuTitle: 'table'
+                            path: '/index/platecollect',
+                            subMenuTitle: '分类管理'
                         }
                     ]
                 }

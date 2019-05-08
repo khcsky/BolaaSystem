@@ -91,37 +91,38 @@ export default {
       submitForm() {
         this.$refs.loginForm.validate((valid) => {
           if (valid) {
+            this.$router.push('/index')
               // 发送请求给后端
-           const params ={
-             account:this.loginForm.account,
-             password:this.loginForm.password
-           }
-             // 发送请求给后端
-           this.req.post('./login/checklogin',params)
-           .then(res=>{
+          //  const params ={
+          //    account:this.loginForm.account,
+          //    password:this.loginForm.password
+          //  }
+          //    // 发送请求给后端
+          //  this.req.post('./login/checklogin',params)
+          //  .then(res=>{
             
-            let { code, reason ,token} =res;
+          //   let { code, reason ,token} =res;
 
-            if(code===0){
-              // 弹成功提示
-               // 把token存入浏览器
-              window.localStorage.setItem('token', token);
-                this.$message({
-                    type: 'success',
-                    message: reason
-                   })
-                     // 跳后端首页
-                   this.$router.push('/index')
-            }else if(code===1){
+          //   if(code===0){
+          //     // 弹成功提示
+          //      // 把token存入浏览器
+          //     window.localStorage.setItem('token', token);
+          //       this.$message({
+          //           type: 'success',
+          //           message: reason
+          //          })
+          //            // 跳后端首页
+          //          this.$router.push('/index')
+          //   }else if(code===1){
 
-              this.$message.error(reason)
-            }
+          //     this.$message.error(reason)
+          //   }
               
-           })
-           .catch(err=>{
-             console.log(err);
+          //  })
+          //  .catch(err=>{
+          //    console.log(err);
              
-           })
+          //  })
             
           } else {
             console.log('验证失败!');

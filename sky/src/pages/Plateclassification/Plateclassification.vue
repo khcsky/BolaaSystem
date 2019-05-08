@@ -1,9 +1,10 @@
- //项目列表数据组件
+//板块分类组件
+
 <template>
     <div>
       <el-card class="box-card">
       <div slot="header" class="clearfix">
-        <span>项目列表</span>
+        <span>分类列表</span>
       </div>
       <div class="text item">
         <el-table

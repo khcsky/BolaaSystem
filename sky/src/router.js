@@ -1,3 +1,5 @@
+
+
 import Vue from 'vue'
 import Router from 'vue-router'
 
@@ -24,6 +26,16 @@ export default new Router({
         path: '',
         name: '',
         component: () => import('./pages/Projectentity/Projectentity')
+      },
+      { //板块采集
+        path: '/index/plateclassification',
+        name: 'plateclassification',
+        component: () => import('./pages/Plateclassification/Plateclassification')
+      },
+      { //板块分类
+        path: '/index/platecollect',
+        name: 'platecollect',
+        component: () => import('./pages/Platecollect/Platecollect')
       },
       
       { //个人中心

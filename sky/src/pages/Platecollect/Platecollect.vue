@@ -1,9 +1,9 @@
- //项目列表数据组件
+// 板块采集组件
 <template>
     <div>
       <el-card class="box-card">
       <div slot="header" class="clearfix">
-        <span>项目列表</span>
+        <span>采集列表</span>
       </div>
       <div class="text item">
         <el-table
@@ -321,7 +321,7 @@
   //生命周期钩子函数
   created() {
 
-    let data=[
+   let data=[
       {pid:1,pname:"项目一",startTime:"2019/3/2",endTime:"2019/4/4",industryId:'教育',customerId:"1101",stopTime:"2019/5/8",status:"上线",customerName:"客户1",userId:"张三",operateTime:"2019/5/9",remark:"remark"},
       {pid:2,pname:"项目二",startTime:"2017/3/2",endTime:"2018/2/4",industryId:'汽车',customerId:"1102",stopTime:"2018/5/8",status:"线下",customerName:"客户2",userId:"李四",operateTime:"2019/1/9",remark:"remark"},
     ]
