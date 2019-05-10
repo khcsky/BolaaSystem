@@ -25,6 +25,7 @@
                 </span>
                 <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item command="personal">个人中心</el-dropdown-item>
+                  <el-dropdown-item command="passwordmodfiy">密码修改</el-dropdown-item>
                   <el-dropdown-item command="logout">退出</el-dropdown-item>
                 </el-dropdown-menu>
               </el-dropdown>
@@ -56,11 +57,15 @@ export default {
             message: "退出成功，欢迎回来"
           });
         setTimeout(() => {
-          this.$router.push("./login");
+          this.$router.push("/login");
         }, 1000);
       } else if (command === 'personal') {
             // 跳转到个人中心
             this.$router.push('/index/personal');
+        }
+         else if (command === 'passwordmodfiy') {
+            // 跳转到个人中心
+            this.$router.push('/index/passwordmodfiy');
         }
     },
 

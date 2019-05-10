@@ -7,15 +7,14 @@
       </div>
       <div class="text item">
         <el-table
-          ref="PorTableData"
-          :data="PorTableData"
+          ref="TableData1"
+          :data="TableData1"
           @selection-change="handleSelectionChange"
           tooltip-effect="dark"
           style="width: 100%"
         >
           <!-- 多选框 -->
           <el-table-column type="selection" width="55"></el-table-column>
-
           <!-- 主键id -->
           <el-table-column prop="pid" label="项目编号"></el-table-column>
 
@@ -56,7 +55,7 @@
             </template>
           </el-table-column>
         </el-table>
-        <el-pagination
+         <el-pagination
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
           :current-page="currentPage"
@@ -65,6 +64,7 @@
           layout="total, sizes, prev, pager, next, jumper"
           :total="total"
         ></el-pagination>
+
         <div style="margin-top:20px;">
           <el-button @click="batchesdel" type="danger">批量删除</el-button>
           <el-button @click="cancelselect" type="primary">取消选中</el-button>
@@ -110,7 +110,7 @@
         ]
       },
       // 项目列表数据
-      PorTableData: [],
+      // PorTableData: [],
       dialogFormVisible: false, // 控制模态框显示和隐藏
       accountEditForm: {
         // 修改表单的数据
@@ -122,13 +122,30 @@
       selectedId: [], // 选中的id数组
       total: 0,
       currentPage: 1, //当前默认页
-      pageSize: 3 //每页多少条数据
+      pageSize: 5 //每页多少条数据
     };
   },
   methods: {
     
     // 按照分页请求数据
     getAccontListByPage(){
+       let data=[
+      {pid:1,pname:"项目一",startTime:"2019/3/2",endTime:"2019/4/4",industryId:'教育',customerId:"1101",stopTime:"2019/5/8",status:"上线",customerName:"客户1",userId:"张三",operateTime:"2019/5/9",remark:"remark"},
+      {pid:2,pname:"项目二",startTime:"2017/3/2",endTime:"2018/2/4",industryId:'汽车',customerId:"1102",stopTime:"2018/5/8",status:"线下",customerName:"客户2",userId:"李四",operateTime:"2019/1/9",remark:"remark"},
+      {pid:2,pname:"项目二",startTime:"2017/3/2",endTime:"2018/2/4",industryId:'汽车',customerId:"1102",stopTime:"2018/5/8",status:"线下",customerName:"客户2",userId:"李四",operateTime:"2019/1/9",remark:"remark"},
+      {pid:2,pname:"项目二",startTime:"2017/3/2",endTime:"2018/2/4",industryId:'汽车',customerId:"1102",stopTime:"2018/5/8",status:"线下",customerName:"客户2",userId:"李四",operateTime:"2019/1/9",remark:"remark"},
+      {pid:2,pname:"项目二",startTime:"2017/3/2",endTime:"2018/2/4",industryId:'汽车',customerId:"1102",stopTime:"2018/5/8",status:"线下",customerName:"客户2",userId:"李四",operateTime:"2019/1/9",remark:"remark"},
+      
+    
+    ]
+    this.TableData1=data;
+     this.total=data.length;
+     if (!data.length && this.currentPage !== 1) {
+                this.currentPage -= 1;  // 当前页码自减1
+               this.getAccontListByPage(); // 再次请求数据
+                    }
+  console.log()
+ 
         //  let params = {
         //    pageSize: this.pageSize,
         //    currentPage: this.currentPage
@@ -321,14 +338,8 @@
   //生命周期钩子函数
   created() {
 
-   let data=[
-      {pid:1,pname:"项目一",startTime:"2019/3/2",endTime:"2019/4/4",industryId:'教育',customerId:"1101",stopTime:"2019/5/8",status:"上线",customerName:"客户1",userId:"张三",operateTime:"2019/5/9",remark:"remark"},
-      {pid:2,pname:"项目二",startTime:"2017/3/2",endTime:"2018/2/4",industryId:'汽车',customerId:"1102",stopTime:"2018/5/8",status:"线下",customerName:"客户2",userId:"李四",operateTime:"2019/1/9",remark:"remark"},
-    ]
-    this.PorTableData=data;
-  console.log(this.PorTableData)
-    // // 调用按照分页显示数据的函数
-    // this.getAccontListByPage()
+   
+     this.getAccontListByPage()
   },
   //过滤器
   filters: {
@@ -337,11 +348,24 @@
     }
   }
     }
+    
 </script>
 
 <style lang="less">
 
 .cell .el-button+.el-button{
   margin: 0;
+}
+ .el-card {
+    .el-card__header {
+      font-size: 18px;
+      font-weight: 700;
+      background-color: #f1f1f1;
+    }
+  }
+.el-table .cell{
+  font-size: 12px;
+  padding-left: 4px;
+  padding-right: 4px;
 }
 </style>

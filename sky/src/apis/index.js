@@ -10,16 +10,21 @@ export function getCollectList (params) {
 
 // 采集管理 删除
 export function delCollectList (params) {
-    return axios.get(`${url}account/delCollectList`, qs.stringify(params))
+    return axios.get(`${url}account/delCollectList`, params)
 }
 
 // 采集管理 编辑
 export function saveCollectList (params) {
-    return axios.get(`${url}account/saveCollectList`, qs.stringify(params))
+    return axios.get(`${url}account/saveCollectList`, params)
 }
 
 // 采集管理 远程搜索
 export function getRemoteList (params) {
-    return axios.get(`${url}account/getRemoteList`, qs.stringify(params))
+    return axios.get(`${url}account/getRemoteList`, params)
 }
 
+//密码修改
+// 采集管理 远程搜索
+export function getSavePassword (params) {
+    return axios.post(`${url}account/getRemoteList`, qs.stringify(params))
+}

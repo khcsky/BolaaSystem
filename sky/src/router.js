@@ -37,7 +37,11 @@ export default new Router({
         name: 'platecollect',
         component: () => import('./pages/Platecollect/Platecollect')
       },
-      
+      { //密码修改
+        path: '/index/passwordmodfiy',
+            name: 'passwordmodfiy',
+            component: () => import('./pages/Passwordmodfiy/Passwordmodfiy')
+      },
       { //个人中心
         path: '/index/personal',
             name: 'personal',

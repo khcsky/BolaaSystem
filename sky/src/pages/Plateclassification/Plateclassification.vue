@@ -384,4 +384,9 @@
 .cell .el-button+.el-button{
   margin: 0;
 }
+.el-table .cell{
+  font-size: 12px;
+  padding-left: 4px;
+  padding-right: 4px;
+}
 </style>

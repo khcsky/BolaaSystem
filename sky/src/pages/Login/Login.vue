@@ -23,13 +23,13 @@
                     <el-input type="password" v-model="loginForm.password" autocomplete="off"></el-input>
                 </el-form-item>
              
-                <el-form-item label="确认密码" prop="checkPass">
+                <!-- <el-form-item label="确认密码" prop="checkPass">
                     <el-input type="password" v-model="loginForm.checkPass" autocomplete="off"></el-input>
-                </el-form-item>
+                </el-form-item> -->
 
 
                 <el-form-item>
-                    <el-button type="primary" @click="submitForm('ruleForm2')">提交</el-button>
+                    <el-button  type="primary" @click="submitForm('ruleForm2')">登录</el-button>
                     <el-button @click="resetForm('ruleForm2')">重置</el-button>
                 </el-form-item>
             </el-form>
@@ -53,37 +53,37 @@ export default {
                  callback();
              }
          }
-         // 自定义验证确认密码函数
-         let checkPwd = (rule, value, callback)=>{
-             if(value===''){
-                  callback(new Error('请再次输入密码')); 
-             }else if(value !==this.loginForm.password){//如果不等于第一次输入的密码报错
-                 callback(new Error('两次密码不一致'))
-             }else{
-                 callback(); // 直接调用就是成功
-             }
-         }
+        //  // 自定义验证确认密码函数
+        //  let checkPwd = (rule, value, callback)=>{
+        //      if(value===''){
+        //           callback(new Error('请再次输入密码')); 
+        //      }else if(value !==this.loginForm.password){//如果不等于第一次输入的密码报错
+        //          callback(new Error('两次密码不一致'))
+        //      }else{
+        //          callback(); // 直接调用就是成功
+        //      }
+        //  }
       return {
         loginForm: {
           account: '',// 账号
            password: '',// 密码
-          checkPass: ''// 确认密码
+          // checkPass: ''// 确认密码
           
         },
         rules: {
           // 账号验证
           account:[
                { required: true, message: '请输入账号', trigger: 'blur' }, // 非空验证
-               { min: 3, max: 5, message: '长度在 3 到 6 个字符', trigger: 'blur' } // 
+               { min: 3, max: 5, message: '长度在 4 到 16 个字符', trigger: 'blur' } // 
           ],
           // 密码验证
           password:[
            
                 { required: true, validator: validatePwd,  trigger: 'blur' } // 自定义验证规则
           ],
-           checkPass:[
-               { required: true, validator: checkPwd,  trigger: 'blur' } // 自定义验证规则
-           ]
+          //  checkPass:[
+          //      { required: true, validator: checkPwd,  trigger: 'blur' } // 自定义验证规则
+          //  ]
         }
       };
     },
@@ -137,6 +137,8 @@ export default {
     }
 }
 </script>
-<style lang="less">
+<style lang="less" scope>
+
     @import './Login.less';
+    
 </style>
