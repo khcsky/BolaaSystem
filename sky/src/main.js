@@ -3,6 +3,7 @@ import App from './App.vue'
 import router from './router'
 import './assets/styles/iconfont.css'
 import store from './store/store'
+// import './mock'
 
 //引入echarts报表
 import echarts from 'echarts'
