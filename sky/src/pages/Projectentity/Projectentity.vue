@@ -41,10 +41,14 @@
                   <el-col :span="5">
                       <el-button type="success" @click="getList">查询</el-button>
                   </el-col>
+                  <el-col :span="5">
+                      <el-button type="primary" @click="handleEdit">添加</el-button>
+                  </el-col>
               </el-row>
           </el-form>
-        <Table :PorTableData="PorTableData" :colConfigs="colConfigs" :activeSon="batchesdel">
-            <!--<el-table-column slot="opt">
+        <Table :PorTableData="PorTableData" :colConfigs="colConfigs">
+            <!-- :activeSon="batchesdel"
+            <el-table-column slot="opt">
                 <el-button size="mini" slot-scope="{ row }">查看</el-button>
             </el-table-column>-->
             <el-table-column label="管理" slot="opt" >
@@ -69,7 +73,7 @@
         <Dialogs :title="title" :accountEditForm="accountEditForm" :colConfigs="colConfigs" :dialogFormVisible="dialogFormVisible" :rules="rules"  ref="dialogs"></Dialogs>
         -->
           <!-- 模态框 -->
-        <el-dialog width="500px" title="信息修改" :visible.sync="dialogFormVisible">
+        <el-dialog width="500px" :title="title[edit]" :visible.sync="dialogFormVisible">
           <!-- 表格 -->
           <el-form :model="accountEditForm" prop="usergroup" :rules="rules" style="width: 320px;">
             <!-- 表单 -->
@@ -107,7 +111,6 @@
  import moment from "moment";
  import Table from "../../components/Table/Table"
  import Paging from "../../components/Paging/Paging"
- import {getRemoteList,getCollectList} from "../../apis"
 
  export default {
    data() {
@@ -158,6 +161,8 @@
       },
       options: [], // 远程搜索
       loading: false,
+      edit: 1,
+      title: ['添加', '编辑']
      };
    },
    components: {
@@ -173,9 +178,11 @@
               category: this.searchForm.category,
               keyword: this.searchForm.keyword ,
           };
-          sessionStorage.setItem('listQuery', JSON.stringify(this.listQuery));
-
-          let res = await getCollectList(params);
+          // sessionStorage.setItem('listQuery', JSON.stringify(this.listQuery));
+          let res = await this.$api.project.getList(params);
+          if (!res || !res.data) {
+              return  false;
+          }
           let {code, page, data} = res.data;
           if (code !== 0) {
               console.log('错误');
@@ -191,8 +198,8 @@
                   data[i]['operateTime'] = this.filterCtime(v.operateTime);
               });
 
-              this.PorTableData = data
-              this.total = page.pageTotal
+              this.PorTableData = data;
+              this.total = page.pageTotal;
 
               // 如果数据为空 （优化 当当前页码数据为空 跳转到上一页）
               if (!data && this.listQuery.page !== 1) {
@@ -217,7 +224,10 @@
         type: "warning"
       })
         .then(async () => {
-          let res = await delCollectList({ pid: row.pid });
+          let res = await this.$api.project.update({ pid: row.pid });
+          if (!res || !res.data) {
+             return  false;
+          }
           // 接收后端返回的数据
           let { code, msg } = res.data;
 
@@ -244,36 +254,32 @@
         });
     },
       //修改函数
-      handleEdit(row, index) {
+      handleEdit(row = {}, index = -1) {
       // 显示模态框
        this.dialogFormVisible = true;
+       if (Object.keys(row).length === 0 || index === -1) {
+          this.edit = 0;
+          Object.keys(this.accountEditForm).forEach(i => {
+              Reflect.set(this.accountEditForm, i, '');
+          });
+          return false;
+       }
+       this.edit = 1;
        this.accountEditForm = row;
       // this.$refs.dialogs.handleEdit(); // 调用子组件的方法
       // 保存数据原来的id
        this.editId = row.pid;
        this.editRow = index
-      // 发送请求给后端
-      // this.req
-      //   .get("./account/accountedit", { id })
-      //   .then(res => {
-      //     //接收后端数据
-      //     let { account, usergroup } = res;
-      //     // 回填表单
-      //     this.accountEditForm.account =account;
-      //     this.accountEditForm.usergroup = usergroup;
-         
-          
-      //   })
-      //   .catch(err => {
-      //     console.log(err);
-      //   });
     },
       //保存修改
       async saveEdit() {
        // 关闭模态框
         this.dialogFormVisible = false;
         let params = Object.assign(this.accountEditForm, {pid: this.editId})
-        let res = await saveCollectList(params);
+        let res = this.edit === 1 ? await this.$api.project.update(params) : await this.$api.project.add(params);
+        if (!res || !res.data) {
+           return  false;
+        }
         let { code, msg } = res.data;
         if (code !== 0) {
           this.$message.error(msg);
@@ -304,50 +310,6 @@
     handleSelectionChange(val) {
       // // val就是选中的数据 把选中数据的id取出来 放在一个数组中
       this.selectedId = val.map(v => v.id);
-      // this.batchesdel()
-    },
-    //批量删除
-    batchesdel() {
-      // 如果用户不选 弹出提示 直接return
-
-      // if (!this.selectedId.length) {
-      //   this.$message.error("你是pig吗 不选就想删!");
-      //   return;
-      // }
-      // this.$confirm("是否批量删除?", "温馨提示", {
-      //   confirmButtonText: "确定",
-      //   cancelButtonText: "取消",
-      //   type: "warning"
-      // })
-      //   .then(() => {
-      //     this.req
-      //       .get("/account/batchesdel", { idArr: this.selectedId })
-      //       .then(res => {
-      //         let { code, reason } = res;
-      //         //判断
-      //         if (code === 0) {
-      //           //弹成功提示 更新列表
-      //           this.$message({
-      //             type: "success",
-      //             message: "reason"
-      //           });
-      //           this.getAccontListByPage();
-      //         } else if (code === 1) {
-      //           // 弹失败提示
-      //           this.$message.error(reason);
-      //         }
-      //       })
-      //       .catch(err => {
-      //         console.log(err);
-      //       });
-      //   })
-      //   .catch(() => {
-      //     // 取消
-      //     this.$message({
-      //       type: "info",
-      //       message: "已取消批量删除"
-      //     });
-      //   });
     },
 
     filterCtime(ctime) {
@@ -355,8 +317,11 @@
     },
     // 远程搜索
     async  remoteCategory (query = '') {
-      let res = await getRemoteList({keyword: query});
-      let {code, msg, data} = res.data
+      let res = await this.$api.project.getRemoteList({keyword: query});
+      if (!res || !res.data) {
+          return  false;
+      }
+      let {code, msg, data} = res.data;
       this.loading = true;
       if (code !== 0) {
         this.$message.error(msg);
