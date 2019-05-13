@@ -111,6 +111,7 @@
  import moment from "moment";
  import Table from "../../components/Table/Table"
  import Paging from "../../components/Paging/Paging"
+ import {isJSON, isString} from "../../utils/base"
 
  export default {
    data() {
@@ -128,7 +129,7 @@
          { prop: 'operateTime', label: '操作时间' ,width:"120"},
          { prop: 'remark', label: '备注', width:"120"},
          { slot: 'opt' }
-         ])
+      ]);
      return {
       rules: {
         //模态框验证
@@ -147,8 +148,11 @@
       dialogFormVisible: false, // 控制模态框显示和隐藏
       accountEditForm: {
         // 修改表单的数据
-          pid: "",
-          pnamepname: ""
+          pname: "",
+          time: "",
+          industryId: "",
+          customerId: "",
+          status: ""
       },
       formLabelWidth: "100px",
       editId: 0, // 需要修改的数据的id
@@ -175,16 +179,27 @@
           const params = {
               page: this.listQuery.page,
               rows:  this.listQuery.limit,
-              category: this.searchForm.category,
-              keyword: this.searchForm.keyword ,
+              //category: this.searchForm.category,
+              keyWord: this.searchForm.keyword ,
           };
           // sessionStorage.setItem('listQuery', JSON.stringify(this.listQuery));
           let res = await this.$api.project.getList(params);
           if (!res || !res.data) {
               return  false;
           }
+          if (isString(res.data) && isJSON(res.data) && JSON.parse(res.data.replace(/'/g, '"'))
+              && JSON.parse(res.data.replace(/'/g, '"')).code === 5001) {
+              window.localStorage.removeItem('token');
+              window.localStorage.removeItem('userId');
+              window.localStorage.removeItem('username');
+              this.$router.push('/login');
+              return false;
+          }
           let {code, page, data} = res.data;
-          if (code !== 0) {
+          if (code === 5003) {
+            window.localStorage.setItem('token', res.data.token);
+          }
+          if (code !== 0 && code !== 5003) {
               console.log('错误');
               return false
           }
@@ -196,6 +211,9 @@
                   data[i]['endTime'] = this.filterCtime(v.endTime);
                   data[i]['stopTime'] = this.filterCtime(v.stopTime);
                   data[i]['operateTime'] = this.filterCtime(v.operateTime);
+                  if (this.filterCtime(v.startTime) === '' ||  this.filterCtime(v.startTime) === '') {
+                      data[i]['time'] = '';
+                  }
               });
 
               this.PorTableData = data;
@@ -221,7 +239,7 @@
         this.$confirm("是否确定删除?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
-        type: "warning"
+         type: "warning"
       })
         .then(async () => {
           let res = await this.$api.project.update({ pid: row.pid });
@@ -232,14 +250,14 @@
           let { code, msg } = res.data;
 
           if (code !== 0) {
-            this.$message.error(msg);
+            this.$message.error(msg || '错误');
             return false;
-           }
+           };
 
           // 弹出成功提示
           this.$message({
             type: "success",
-            message: msg
+            message: msg || "成功"
           });
 
           // 刷新列表数据
@@ -248,7 +266,7 @@
         .catch(() => {
           // 取消
           this.$message({
-            type: "info",
+            //type: "info",
             message: "已取消删除"
           });
         });
@@ -275,23 +293,29 @@
       async saveEdit() {
        // 关闭模态框
         this.dialogFormVisible = false;
-        let params = Object.assign(this.accountEditForm, {pid: this.editId})
-        let res = this.edit === 1 ? await this.$api.project.update(params) : await this.$api.project.add(params);
+        let params = this.edit === 1 ? Object.assign(this.accountEditForm, {pid: this.editId}) : this.accountEditForm;
+         // let params = this.accountEditForm;
+          // if (this.edit === 1) { params.pid = this.editId;}
+        Reflect.deleteProperty(params, 'time');
+        Reflect.deleteProperty(params, 'timeRange');
+        let res = this.edit === 1 ? await this.$api.project.update(params) : await this.$api.project.insert(params);
         if (!res || !res.data) {
            return  false;
         }
         let { code, msg } = res.data;
         if (code !== 0) {
-          this.$message.error(msg);
+          this.$message.error(msg || '失败');
           return false;
         }
 
         // 弹出成功提示
         this.$message({
           type: "success",
-          message: msg
+          message: msg || '成功'
         });
-
+        if (!this.accountEditForm.timeRange) {
+            this.accountEditForm.timeRange = ['', ''];
+        }
         this.accountEditForm.timeRange[0] = this.filterCtime(new Date(this.accountEditForm.timeRange[0]));
         this.accountEditForm.timeRange[1] = this.filterCtime(new Date(this.accountEditForm.timeRange[1]));
         this.PorTableData[this.editRow]['time'] = this.accountEditForm.timeRange.join('~');
@@ -313,7 +337,7 @@
     },
 
     filterCtime(ctime) {
-      return moment(ctime).format("YYYY/MM/DD");
+      return [null, '', undefined].includes(ctime) ?  '' : moment(ctime).format("YYYY/MM/DD");
     },
     // 远程搜索
     async  remoteCategory (query = '') {

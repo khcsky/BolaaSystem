@@ -40,7 +40,7 @@
             },
             layout: {
                 type: String,
-                default: 'total, sizes, prev, pager, next, jumper'
+                default: 'total, sizes, prev, pager, next'
             },
             background: {
                 type: Boolean,

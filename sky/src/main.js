@@ -10,6 +10,7 @@ import echarts from 'echarts'
 
 //引入 封装请求api
 import request from'./apis/request'
+import api from './apis'
 
 //引入elementui
 import ElementUI from 'element-ui'
@@ -21,6 +22,7 @@ Vue.use(ElementUI)
 // 挂载在vue原型上 所有vue实例共享
 Vue.prototype.echarts = echarts;
 Vue.prototype.req = request;
+Vue.prototype.$api = api;
 
 Vue.config.productionTip = false
 

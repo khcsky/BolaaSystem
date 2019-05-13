@@ -1,19 +1,19 @@
 <template>
     <div class="login">
-      <div class="login-wrapper">
-          <h2 class="title">
-               <span class="icon iconfont">&#xe641;</span>
-              <span class="title_word">欢迎来到BLaoo管理系统</span> 
-          </h2>
+        <div class="login-wrapper">
+            <h2 class="title">
+                <span class="icon iconfont">&#xe641;</span>
+                <span class="title_word">欢迎来到Bolaa管理系统</span>
+            </h2>
             <!-- 登录表单 -->
-           <el-form 
-           :model="loginForm" 
-           status-icon 
-           :rules="rules" 
-           ref="loginForm" 
-           label-width="100px"
-            class="demo-ruleForm"
-            >     
+            <el-form
+                    :model="loginForm"
+                    status-icon
+                    :rules="rules"
+                    ref="loginForm"
+                    label-width="100px"
+                    class="demo-ruleForm"
+            >
                 <!-- 账号 -->
                 <el-form-item label="账号" prop="account">
                     <el-input type="text" v-model="loginForm.account" autocomplete="off"></el-input>
@@ -28,101 +28,104 @@
                     <el-button @click="resetForm('ruleForm2')">重置</el-button>
                 </el-form-item>
             </el-form>
-      </div>
+        </div>
     </div>
 </template>
 <script>
-import {login} from "../../apis"
-export default {
-    data() {
-         // 自定义验证密码规则 /^[a-zA-Z0-9] {4,6}$/.test(trim(value))
-         let validatePwd =(rule, value, callback)=>{
-             if (value === '') {
-                 callback(new Error('请输入密码'));
-                 return false;
-             }
-             if (value.length < 4 || value.length > 12) {
-                callback(new Error('长度在 4 到 12 个字符' +value));
-                return false;
-             }
+    export default {
+        data() {
+            // 自定义验证密码规则 /^[a-zA-Z0-9] {4,6}$/.test(trim(value))
+            let validatePwd =(rule, value, callback)=>{
+                if (value === '') {
+                    callback(new Error('请输入密码'));
+                    return false;
+                }
+                if (value.length < 4 || value.length > 12) {
+                    callback(new Error('长度在 4 到 12 个字符' +value));
+                    return false;
+                }
 
-             // 成功的回调
-             callback();
+                // 成功的回调
+                callback();
 
-         }
-         // 自定义验证确认密码函数
-         let checkPwd = (rule, value, callback)=>{
-             if (value === ''){
-                  callback(new Error('请再次输入密码'));
-                  return false;
-             }
-             callback(); // 直接调用就是成功
-         }
-      return {
-        loginForm: {
-            account: '',// 账号
-           password: '',// 密码
-        },
-        rules: {
-          // 账号验证
-          account:[
-               { required: true, message: '请输入账号', trigger: 'blur' }, // 非空验证
-               { min: 3, max: 5, message: '长度在 3 到 6 个字符', trigger: 'blur' } // 
-          ],
-          // 密码验证
-          password:[
-           
-                { required: true, validator: validatePwd,  trigger: 'blur' } // 自定义验证规则
-          ],
-           checkPass:[
-               { required: true, validator: checkPwd,  trigger: 'blur' } // 自定义验证规则
-           ]
-        }
-      };
-    },
-    methods: {
-        submitForm() {
-        this.$refs.loginForm.validate(async (valid) => {
-            if (!valid) {
-                console.log('验证失败!');
-                return false;
             }
-            // debugger
-            // 发送请求给后端
-           const params ={
-             username: this.loginForm.account,
-             password: this.loginForm.password
-           };
+            // 自定义验证确认密码函数
+            let checkPwd = (rule, value, callback)=>{
+                if (value === ''){
+                    callback(new Error('请再次输入密码'));
+                    return false;
+                }
+                callback(); // 直接调用就是成功
+            }
+            return {
+                loginForm: {
+                    account: '',// 账号
+                    password: '',// 密码
+                },
+                rules: {
+                    // 账号验证
+                    account:[
+                        { required: true, message: '请输入账号', trigger: 'blur' }, // 非空验证
+                        { min: 3, max: 5, message: '长度在 3 到 6 个字符', trigger: 'blur' } //
+                    ],
+                    // 密码验证
+                    password:[
 
-           let res = await login(params);
-           if (!res.data) {
-               console.log(res);
-               return false;
-           }
-           let {code, token, userId, username} = res.data;
+                        { required: true, validator: validatePwd,  trigger: 'blur' } // 自定义验证规则
+                    ],
+                    checkPass:[
+                        { required: true, validator: checkPwd,  trigger: 'blur' } // 自定义验证规则
+                    ]
+                }
+            };
+        },
+        methods: {
+            submitForm() {
+                this.$refs.loginForm.validate(async (valid) => {
+                    if (!valid) {
+                        console.log('验证失败!');
+                        return false;
+                    }
+                    // debugger
+                    // 发送请求给后端
+                    const params ={
+                        username: this.loginForm.account,
+                        password: this.loginForm.password
+                    };
 
-           if (code !== 0) {
-              this.$message.error('登陆失败');
-              return  false;
-           }
+                    let res = await this.$api.login.login(params);
+                    if (!res || !res.data) {
+                        return false;
+                    }
+                    let {code, token, userId, username} = res.data;
 
-           window.localStorage.setItem('token', token);
-           window.localStorage.setItem('userId', userId);
-           window.localStorage.setItem('username', username);
+                    if (code !== 0) {
+                        this.$message.error('登陆失败');
+                        return  false;
+                    }
 
-           this.$message({
-            type: 'success',
-            message: '登陆成功'
-           });
-           this.$router.push('/index');
+                    window.localStorage.setItem('token', token);
+                    window.localStorage.setItem('userId', userId);
+                    window.localStorage.setItem('username', username);
 
-        });
-      },
-      resetForm(formName) {
-        this.$refs[formName].resetFields();
-      }
+                    this.$message({
+                        type: 'success',
+                        message: '登陆成功'
+                    });
+                    this.$router.push('/index');
+
+                });
+            },
+            resetForm(formName) {
+                this.$refs[formName].resetFields();
+            }
+        },
+        created() {
+            window.localStorage.removeItem('token');
+            window.localStorage.removeItem('userId');
+            window.localStorage.removeItem('username');
+        }
     }
-}
 </script>
 <style lang="less">
     @import './Login.less';

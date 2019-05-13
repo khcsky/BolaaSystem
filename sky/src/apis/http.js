@@ -98,7 +98,7 @@ instance.interceptors.request.use(
     // 获取浏览器中的token
     const token = window.localStorage.getItem('token');
     // 设置请求头 携带token
-    token && (config.headers.Authorization = token);
+    token && (config.headers.token = token);
     return config
   },
   error => Promise.error(error))
