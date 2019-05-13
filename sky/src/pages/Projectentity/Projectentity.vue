@@ -299,8 +299,6 @@
        // 关闭模态框
         this.dialogFormVisible = false;
         let params = this.edit === 1 ? Object.assign(this.accountEditForm, {pid: this.editId}) : this.accountEditForm;
-         // let params = this.accountEditForm;
-          // if (this.edit === 1) { params.pid = this.editId;}
         Reflect.deleteProperty(params, 'time');
         Reflect.deleteProperty(params, 'timeRange');
         let res = this.edit === 1 ? await this.$api.project.update(params) : await this.$api.project.insert(params);
