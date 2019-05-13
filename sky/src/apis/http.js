@@ -78,7 +78,7 @@ const errorHandle = (status, other) => {
 // 创建axios实例
 const instance = axios.create({
   // baseURL: process.env.API_ROOT,
-  baseURL: location.origin + '/',
+  baseURL: location.protocol + "172.16.60.64:80" + '/',
   headers: {
     'accept': 'application/json',
     'Content-Type': 'application/json;charset=UTF-8'

@@ -18,15 +18,10 @@
                 <el-form-item label="账号" prop="account">
                     <el-input type="text" v-model="loginForm.account" autocomplete="off"></el-input>
                 </el-form-item>
-
+                <!-- 密码 -->
                 <el-form-item label="密码" prop="password">
                     <el-input type="password" v-model="loginForm.password" autocomplete="off"></el-input>
                 </el-form-item>
-             
-                <!-- <el-form-item label="确认密码" prop="checkPass">
-                    <el-input type="password" v-model="loginForm.checkPass" autocomplete="off"></el-input>
-                </el-form-item> -->
-
 
                 <el-form-item>
                     <el-button  type="primary" @click="submitForm('ruleForm2')">登录</el-button>
@@ -37,6 +32,7 @@
     </div>
 </template>
 <script>
+ import {LoginCheck} from "../../apis"
 export default {
     data() {
          // 自定义验证密码规则
@@ -53,50 +49,43 @@ export default {
                  callback();
              }
          }
-        //  // 自定义验证确认密码函数
-        //  let checkPwd = (rule, value, callback)=>{
-        //      if(value===''){
-        //           callback(new Error('请再次输入密码')); 
-        //      }else if(value !==this.loginForm.password){//如果不等于第一次输入的密码报错
-        //          callback(new Error('两次密码不一致'))
-        //      }else{
-        //          callback(); // 直接调用就是成功
-        //      }
-        //  }
       return {
         loginForm: {
           account: '',// 账号
            password: '',// 密码
-          // checkPass: ''// 确认密码
           
         },
         rules: {
           // 账号验证
           account:[
                { required: true, message: '请输入账号', trigger: 'blur' }, // 非空验证
-               { min: 3, max: 5, message: '长度在 4 到 16 个字符', trigger: 'blur' } // 
+               { min: 3, max: 8, message: '长度在 4 到 7 个字符', trigger: 'blur' } // 
           ],
           // 密码验证
           password:[
            
                 { required: true, validator: validatePwd,  trigger: 'blur' } // 自定义验证规则
           ],
-          //  checkPass:[
-          //      { required: true, validator: checkPwd,  trigger: 'blur' } // 自定义验证规则
-          //  ]
         }
       };
     },
     methods: {
       submitForm() {
-        this.$refs.loginForm.validate((valid) => {
+        this.$refs.loginForm.validate( async (valid) => {
           if (valid) {
-            this.$router.push('/index')
+           
               // 发送请求给后端
-          //  const params ={
-          //    account:this.loginForm.account,
-          //    password:this.loginForm.password
-          //  }
+           const params ={
+             username:this.loginForm.account,
+             password:this.loginForm.password
+           }
+           let res = await LoginCheck(params)
+
+            console.log(res)
+
+
+
+
           //    // 发送请求给后端
           //  this.req.post('./login/checklogin',params)
           //  .then(res=>{
