@@ -7,14 +7,15 @@
       </div>
       <div class="text item">
         <el-table
-          ref="TableData1"
-          :data="TableData1"
+          ref="PorTableData"
+          :data="PorTableData"
           @selection-change="handleSelectionChange"
           tooltip-effect="dark"
           style="width: 100%"
         >
           <!-- 多选框 -->
           <el-table-column type="selection" width="55"></el-table-column>
+
           <!-- 主键id -->
           <el-table-column prop="pid" label="项目编号"></el-table-column>
 
@@ -55,7 +56,7 @@
             </template>
           </el-table-column>
         </el-table>
-         <el-pagination
+        <el-pagination
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
           :current-page="currentPage"
@@ -64,15 +65,14 @@
           layout="total, sizes, prev, pager, next, jumper"
           :total="total"
         ></el-pagination>
-
         <div style="margin-top:20px;">
           <el-button @click="batchesdel" type="danger">批量删除</el-button>
           <el-button @click="cancelselect" type="primary">取消选中</el-button>
         </div>
         <!-- 模态框 -->
-        <el-dialog width="400px" title="用户名修改" :visible.sync="dialogFormVisible">
+        <el-dialog width="500px" title="修改" :visible.sync="dialogFormVisible">
           <!-- 表格 -->
-          <el-form :model="accountEditForm" prop="usergroup" :rules="rules" style="width: 320px;">
+          <el-form :model="accountEditForm" prop="usergroup" :rules="rules" style="width: 420px;">
             <!-- 账号 -->
             <el-form-item label="用户名" prop="account" :label-width="formLabelWidth">
               <el-input v-model="accountEditForm.account" autocomplete="off"></el-input>
@@ -99,53 +99,49 @@
 <script>
  import moment from "moment";
     export default {
-         data() {
-    return {
-      rules: {
-        //模态框验证
-        // 用户名
-        account: [
-          { required: true, message: "请输入账号", trigger: "blur" }, // 非空验证
-          { min: 3, max: 5, message: "账号长度在 3 到 5 位" } // 长度验证
-        ]
-      },
-      // 项目列表数据
-      // PorTableData: [],
-      dialogFormVisible: false, // 控制模态框显示和隐藏
-      accountEditForm: {
-        // 修改表单的数据
-        account: "",
-        usergroup: ""
-      },
-      formLabelWidth: "100px",
-      editId: 0, // 需要修改的数据的id
-      selectedId: [], // 选中的id数组
-      total: 0,
-      currentPage: 1, //当前默认页
-      pageSize: 5 //每页多少条数据
-    };
-  },
+       data() {
+         this.colConfigs = [
+           { prop: 'pid', label: '项目编号' },
+           { prop: 'pname', label: '项目名称' },
+           { prop: 'startTime', label: '开始时间' },
+           { prop: 'endTime', label: '结束时间' },
+           { prop: 'industryId', label: '项目行业' },
+           { prop: 'customerId', label: '客户ID' },
+           { prop: 'stopTime', label: '停止时间' },
+           { prop: 'status', label: '项目状态' },
+           { prop: 'userId', label: '操作人' },
+           { prop: 'operateTime', label: '操作时间' },
+           { prop: 'remark', label: '备注' },
+         ]
+       return {
+        rules: {
+          //模态框验证
+          // 用户名
+          account: [
+            { required: true, message: "请输入账号", trigger: "blur" }, // 非空验证
+            { min: 3, max: 5, message: "账号长度在 3 到 5 位" } // 长度验证
+          ]
+        },
+        // 项目列表数据
+        PorTableData: [],
+        dialogFormVisible: false, // 控制模态框显示和隐藏
+        accountEditForm: {
+          // 修改表单的数据
+          account: "",
+          usergroup: ""
+        },
+        formLabelWidth: "100px",
+        editId: 0, // 需要修改的数据的id
+        selectedId: [], // 选中的id数组
+        total: 0,
+        currentPage: 1, //当前默认页
+        pageSize: 3 //每页多少条数据
+      };
+    },
   methods: {
     
     // 按照分页请求数据
     getAccontListByPage(){
-       let data=[
-      {pid:1,pname:"项目一",startTime:"2019/3/2",endTime:"2019/4/4",industryId:'教育',customerId:"1101",stopTime:"2019/5/8",status:"上线",customerName:"客户1",userId:"张三",operateTime:"2019/5/9",remark:"remark"},
-      {pid:2,pname:"项目二",startTime:"2017/3/2",endTime:"2018/2/4",industryId:'汽车',customerId:"1102",stopTime:"2018/5/8",status:"线下",customerName:"客户2",userId:"李四",operateTime:"2019/1/9",remark:"remark"},
-      {pid:2,pname:"项目二",startTime:"2017/3/2",endTime:"2018/2/4",industryId:'汽车',customerId:"1102",stopTime:"2018/5/8",status:"线下",customerName:"客户2",userId:"李四",operateTime:"2019/1/9",remark:"remark"},
-      {pid:2,pname:"项目二",startTime:"2017/3/2",endTime:"2018/2/4",industryId:'汽车',customerId:"1102",stopTime:"2018/5/8",status:"线下",customerName:"客户2",userId:"李四",operateTime:"2019/1/9",remark:"remark"},
-      {pid:2,pname:"项目二",startTime:"2017/3/2",endTime:"2018/2/4",industryId:'汽车',customerId:"1102",stopTime:"2018/5/8",status:"线下",customerName:"客户2",userId:"李四",operateTime:"2019/1/9",remark:"remark"},
-      
-    
-    ]
-    this.TableData1=data;
-     this.total=data.length;
-     if (!data.length && this.currentPage !== 1) {
-                this.currentPage -= 1;  // 当前页码自减1
-               this.getAccontListByPage(); // 再次请求数据
-                    }
-  console.log()
- 
         //  let params = {
         //    pageSize: this.pageSize,
         //    currentPage: this.currentPage
@@ -338,8 +334,14 @@
   //生命周期钩子函数
   created() {
 
-   
-     this.getAccontListByPage()
+   let data=[
+      {pid:1,pname:"项目一",startTime:"2019/3/2",endTime:"2019/4/4",industryId:'教育',customerId:"1101",stopTime:"2019/5/8",status:"上线",customerName:"客户1",userId:"张三",operateTime:"2019/5/9",remark:"remark"},
+      {pid:2,pname:"项目二",startTime:"2017/3/2",endTime:"2018/2/4",industryId:'汽车',customerId:"1102",stopTime:"2018/5/8",status:"线下",customerName:"客户2",userId:"李四",operateTime:"2019/1/9",remark:"remark"},
+    ]
+    this.PorTableData=data;
+  console.log(this.PorTableData)
+    // // 调用按照分页显示数据的函数
+    // this.getAccontListByPage()
   },
   //过滤器
   filters: {
@@ -348,24 +350,11 @@
     }
   }
     }
-    
 </script>
 
 <style lang="less">
 
 .cell .el-button+.el-button{
   margin: 0;
-}
- .el-card {
-    .el-card__header {
-      font-size: 18px;
-      font-weight: 700;
-      background-color: #f1f1f1;
-    }
-  }
-.el-table .cell{
-  font-size: 12px;
-  padding-left: 4px;
-  padding-right: 4px;
 }
 </style>

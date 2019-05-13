@@ -41,6 +41,9 @@
                   <el-col :span="5">
                       <el-button type="success" @click="getList">查询</el-button>
                   </el-col>
+                  <el-col :span="5">
+                      <el-button type="primary" @click="handleEdit">添加</el-button>
+                  </el-col>
               </el-row>
           </el-form>
         <Table :PorTableData="PorTableData" :colConfigs="colConfigs" :activeSon="batchesdel">
@@ -69,7 +72,7 @@
         <Dialogs :title="title" :accountEditForm="accountEditForm" :colConfigs="colConfigs" :dialogFormVisible="dialogFormVisible" :rules="rules"  ref="dialogs"></Dialogs>
         -->
           <!-- 模态框 -->
-        <el-dialog width="500px" title="信息修改" :visible.sync="dialogFormVisible">
+        <el-dialog width="500px" :title="title" :visible.sync="dialogFormVisible">
           <!-- 表格 -->
           <el-form :model="accountEditForm" prop="usergroup" :rules="rules" style="width: 320px;">
             <!-- 表单 -->
@@ -112,22 +115,26 @@
  export default {
    data() {
      this.colDialog = [
-         { prop: 'pname', label: '项目名称' },
-         { prop: 'time', label: '起止时间' },
-         { prop: 'industryId', label: '项目行业' },
-         { prop: 'customerId', label: '客户名' },
-         { prop: 'status', label: '项目状态' },
+         { prop: 'name', label: '板块名',width:"180" },
+         { prop: 'url', label: '板块地址' },
+         { prop: 'plate_source', label: '板块来源' },
+         { prop: 'interval', label: '间隔时间' },
+         { prop: 'gather_time', label: '下次采集时间' },
+         { prop: 'net_name', label: '站点名' },
+         { prop: 'status', label: '状态' },
          { prop: 'remark', label: '备注' },
      ];
      this.colConfigs = this.colDialog.concat([
-         { prop: 'stopTime', label: '停止时间' },
-         { prop: 'userId', label: '操作人' },
-         { prop: 'operateTime', label: '操作时间' },
+         { prop: 'id', label: 'ID' },
+         { prop: 'userId', label: '板块名' },
+         { prop: 'plug_id', label: '插件名' },
+         { prop: 'start_time', label: '开始时间' },
+         { prop: 'end_time', label: '结束时间' },
          { slot: 'opt' }
          ])
      return {
       rules: {
-        //模态框验证
+        // 模态框验证
         // 用户名
         account: [
           { required: true, message: "请输入账号", trigger: "blur" }, // 非空验证
@@ -148,15 +155,16 @@
       },
       formLabelWidth: "100px",
       editId: 0, // 需要修改的数据的id
-      editRow: 0, //选中行下标
+      editRow: 0, // 选中行下标
       selectedId: [], // 选中的id数组
       total: 10,
       listQuery: {
-         page: 1, //当前默认页
-         limit: 3 //每页多少条数据
+         page: 1, // 当前默认页
+         limit: 3 // 每页多少条数据
       },
       options: [], // 远程搜索
       loading: false,
+      title: '信息修改'
      };
    },
    components: {
@@ -178,7 +186,7 @@
           let {code, page, data} = res.data;
           if (code !== 0) {
               console.log('错误');
-              return false
+              return false;
           }
           try {
               data.map((v, i) => {
@@ -190,8 +198,8 @@
                   data[i]['operateTime'] = this.filterCtime(v.operateTime);
               });
 
-              this.PorTableData = data
-              this.total = page.pageTotal
+              this.PorTableData = data;
+              this.total = page.pageTotal;
 
               // 如果数据为空 （优化 当当前页码数据为空 跳转到上一页）
               if (!data && this.listQuery.page !== 1) {
@@ -243,9 +251,17 @@
         });
     },
       //修改函数
-      handleEdit(row, index) {
+      handleEdit(row = {}, index = -1) {
       // 显示模态框
        this.dialogFormVisible = true;
+       if (Object.keys(row).length === 0 || index === -1) {
+           this.title = '信息添加';
+           Object.keys(this.accountEditForm).forEach(i => {
+               Reflect.set(this.accountEditForm, i, '');
+           });
+           return false;
+       }
+       this.title = '信息修改';
        this.accountEditForm = row;
       // this.$refs.dialogs.handleEdit(); // 调用子组件的方法
       // 保存数据原来的id
@@ -383,10 +399,5 @@
 
 .cell .el-button+.el-button{
   margin: 0;
-}
-.el-table .cell{
-  font-size: 12px;
-  padding-left: 4px;
-  padding-right: 4px;
 }
 </style>
