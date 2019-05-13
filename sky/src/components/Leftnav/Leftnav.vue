@@ -38,6 +38,10 @@ export default {
                         {
                             path: '/index',
                             subMenuTitle: '项目管理'
+                        },
+                        {
+                            path: '/index/projectindustry',
+                            subMenuTitle: '行业管理'
                         }
                     ]
                 },
@@ -47,8 +51,8 @@ export default {
                     icon_code:'&#xe62c',
                     children: [
                         {
-                            path: '/index/accountmanage',
-                            subMenuTitle: 'table'
+                            path: '/index/client',
+                            subMenuTitle: '客户管理'
                         }
                     ]
                 },
@@ -58,45 +62,28 @@ export default {
                     icon_code:'&#xe63a',
                     children: [
                         {
-                            path: '/index/commoditymanage',
-                            subMenuTitle: 'table'
+                            path: '/index/plugin',
+                            subMenuTitle: '插件管理'
                         }
                     ]
                 },
-                //统计管理
+
+                //板块部分
                 {
-                    menuTitle:'项目行业',
-                    icon_code:'&#xe607',
-                    children: [
-                        
-                         {
-                            path: '/index/stockstatistics',
-                            subMenuTitle: 'table'
-                        }
-                    ]
-                },
-                //进货管理
-                {
-                    menuTitle:'板块采集',
+                    menuTitle:'板块',
                     icon_code:'&#xe60b',
                     children: [
                         {
                             path: '/index/plateclassification',
                             subMenuTitle: '采集管理'
-                        }
-                    ]
-                },
-                //板块分类表实体
-                {
-                    menuTitle:'板块分类',
-                    icon_code:'&#xe634',
-                    children: [
+                        },
                         {
                             path: '/index/platecollect',
                             subMenuTitle: '分类管理'
                         }
                     ]
-                }
+                },
+                
             ]
         }
     }

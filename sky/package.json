@@ -19,8 +19,6 @@
     "element-ui": "^2.8.2",
     "less": "^3.0.4",
     "less-loader": "^4.1.0",
-    "mock": "^0.1.1",
-    "mockjs": "^1.0.1-beta3",
     "moment": "^2.24.0",
     "qs": "^6.7.0",
     "vue-template-compiler": "^2.5.21",

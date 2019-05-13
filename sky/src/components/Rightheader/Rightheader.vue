@@ -1,14 +1,14 @@
 
 <template>
   <div class="right-header">
-    <el-row :gutter="20">
-      <el-col :span="18">
+    <el-row :gutter="24">
+      <el-col :span="20">
         <i class="el-icon-menu"></i>
         <span class="title">欢迎来到BOLAA后台管理系统</span>
       </el-col>
-      <el-col :span="6">
+      <el-col :span="4">
         <el-row>
-          <el-col :span="8">
+          <el-col :span="10">
             <!-- 头像 -->
                         <div class="avatar">
                             <router-link to='/index/personal'>
@@ -16,7 +16,7 @@
                             </router-link>
                         </div>
           </el-col>
-          <el-col :span="16">
+          <el-col :span="14">
             <div class="drop-down">
               <el-dropdown @command="handleCommand">
                 <span class="el-dropdown-link">
@@ -45,12 +45,18 @@ export default {
        avatarurl: av
     };
   },
+  created() {
+    this.accountName = window.localStorage.getItem("username")
+    
+  },
   methods: {
     // 点击下拉菜单选项触发函数
     handleCommand(command) {
       if (command === "logout") {
-        //清除token
+        //清除token 用户信息
         window.localStorage.removeItem("token"),
+        window.localStorage.removeItem("userId"),
+        window.localStorage.removeItem("username"),
           // 弹出提示
           this.$message({
             type: "success",

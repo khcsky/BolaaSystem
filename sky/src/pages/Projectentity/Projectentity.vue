@@ -184,16 +184,22 @@
           };
           // sessionStorage.setItem('listQuery', JSON.stringify(this.listQuery));
           let res = await this.$api.project.getList(params);
+
           if (!res || !res.data) {
-              return  false;
+          return  false;
           }
-          if (isString(res.data) && isJSON(res.data) && JSON.parse(res.data.replace(/'/g, '"'))
-              && JSON.parse(res.data.replace(/'/g, '"')).code === 5001) {
-              window.localStorage.removeItem('token');
-              window.localStorage.removeItem('userId');
-              window.localStorage.removeItem('username');
-              this.$router.push('/login');
-              return false;
+          if (isString(res.data)) {
+          res.data = res.data.replace(/'/g, '"');
+          }
+          if (isJSON(res.data)) {
+          res.data = JSON.parse(res.data);
+          }
+          if (res.data.code === 5001) {
+          window.localStorage.removeItem('token');
+          window.localStorage.removeItem('userId');
+          window.localStorage.removeItem('username');
+          this.$router.push('/login');
+          return false;
           }
           let {code, page, data} = res.data;
           if (code === 5003) {
@@ -294,8 +300,6 @@
        // 关闭模态框
         this.dialogFormVisible = false;
         let params = this.edit === 1 ? Object.assign(this.accountEditForm, {pid: this.editId}) : this.accountEditForm;
-         // let params = this.accountEditForm;
-          // if (this.edit === 1) { params.pid = this.editId;}
         Reflect.deleteProperty(params, 'time');
         Reflect.deleteProperty(params, 'timeRange');
         let res = this.edit === 1 ? await this.$api.project.update(params) : await this.$api.project.insert(params);
@@ -360,12 +364,8 @@
    this.getList();
    this.remoteCategory();
   },
-  //过滤器
-  filters: {
-    filterCtime(ctime) {
-       return moment(ctime).format("YYYY/MM/DD hh:mm:ss");
-    },
-  }
+ 
+  
  }
 </script>
 

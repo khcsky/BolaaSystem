@@ -19,13 +19,18 @@ export default new Router({
       name: 'login',
       component: () => import('./pages/Login/Login')
     },
-    { //主页
+    { //项目主页
       path: '/index',
       component: () => import('./pages/Index/Index'),
       children:[{ //默认显示项目
         path: '',
         name: '',
         component: () => import('./pages/Projectentity/Projectentity')
+      },
+      { //项目行业
+        path: '/index/projectindustry',
+        name: 'projectindustry',
+        component: () => import('./pages/Projectindustry/Projectindustry')
       },
       { //板块采集
         path: '/index/plateclassification',
@@ -36,6 +41,16 @@ export default new Router({
         path: '/index/platecollect',
         name: 'platecollect',
         component: () => import('./pages/Platecollect/Platecollect')
+      },
+      { //客户
+        path: '/index/client',
+        name: 'client',
+        component: () => import('./pages/Client/Client')
+      },
+      { //插件
+        path: '/index/plugin',
+        name: 'plugin',
+        component: () => import('./pages/Plugin/Plugin')
       },
       { //密码修改
         path: '/index/passwordmodfiy',
