@@ -78,10 +78,11 @@ const errorHandle = (status, other) => {
 // 创建axios实例
 const instance = axios.create({
   // baseURL: process.env.API_ROOT,
-  baseURL: location.origin + '/',
+  baseURL:  location.protocol + '//172.16.60.64:80' + '/',
   headers: {
     'accept': 'application/json',
-    'Content-Type': 'application/json;charset=UTF-8'
+   //  'Content-Type': 'application/json;charset=UTF-8',
+    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
   },
   withCredentials: true,
   crossDomain: true,
@@ -120,6 +121,7 @@ instance.interceptors.response.use(
     } else {
       // 处理断网的情况
       console.log('网络错误');
+      console.log(response);
     }
   })
 
