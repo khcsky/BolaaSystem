@@ -110,7 +110,7 @@
  import moment from "moment";
  import Table from "../../components/Table/Table"
  import Paging from "../../components/Paging/Paging"
- import {getRemoteList,getCollectList} from "../../apis"
+ import {isJSON, isString} from "../../utils/base"
 
  export default {
    data() {

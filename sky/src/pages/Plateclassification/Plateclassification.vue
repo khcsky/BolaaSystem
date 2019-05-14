@@ -110,7 +110,7 @@
  import moment from "moment";
  import Table from "../../components/Table/Table"
  import Paging from "../../components/Paging/Paging"
- import {getCollectList, delCollectList, saveCollectList, getRemoteList} from "../../apis"
+ import {isJSON, isString} from "../../utils/base"
 
  export default {
    data() {
@@ -183,9 +183,9 @@
           };
 
 
-          let res = await getCollectList(params);
-           if (!res || !res.data) {
-           return  false;
+          let res = await this.$api.collect.getList(params);
+          if (!res || !res.data) {
+             return  false;
           }
           let {code, page, data} = res.data;
           if (code !== 0) {
@@ -220,7 +220,7 @@
         type: "warning"
       })
         .then(async () => {
-          let res = await delCollectList({ pid: row.pid });
+          let res = await this.$api.collect.update({ pid: row.pid });
            if (!res || !res.data) {
           return  false;
       }
@@ -274,7 +274,7 @@
         let params = this.edit === 1 ? Object.assign(this.accountEditForm, {pid: this.editId}) : this.accountEditForm;
         Reflect.deleteProperty(params, 'time');
         Reflect.deleteProperty(params, 'timeRange');
-        let res = this.edit === 1 ? await this.$api.project.update(params) : await this.$api.project.insert(params);
+        let res = this.edit === 1 ? await this.$api.collect.update(params) : await this.$api.collect.insert(params);
         if (!res || !res.data) {
            return  false;
         }
@@ -308,7 +308,7 @@
     },
     // 远程搜索
     async  remoteCategory (query = '') {
-      let res = await getRemoteList({keyword: query});
+      let res = await this.$api.collect.getRemoteList({keyword: query});
       if (!res || !res.data) {
          return  false;
 }

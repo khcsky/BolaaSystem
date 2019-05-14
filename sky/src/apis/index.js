@@ -2,14 +2,17 @@ import axios from './http' // 导入http中创建的axios实例
 import qs from 'qs'
 // getList:列表请求 add: 添加 update: 更新
 // 登陆
-const  login = {
+const login = {
     login (params) {
         return axios.post(`user/login`, qs.stringify(params));
+    },
+    updatePwd (params) {
+        return axios.post(`user/password`, qs.stringify(params));
     }
 }
 
 // 项目管理
-const  project = {
+const project = {
     getList (params) {
         return axios.post(`project/findAll`, qs.stringify(params));
     },
@@ -36,7 +39,18 @@ const commodity = {
 
 // 采集管理
 const collect = {
-
+    getList (params) {
+        return axios.post(`project/findAll`, qs.stringify(params));
+    },
+    insert (params) {
+        return axios.get(`project/insert`, params);
+    },
+    update (params) {
+        return axios.get(`project/update`, params);
+    },
+    getRemoteList (params) {
+        return axios.post(`project/update`, qs.stringify(params));
+    }
 }
 
 export default {

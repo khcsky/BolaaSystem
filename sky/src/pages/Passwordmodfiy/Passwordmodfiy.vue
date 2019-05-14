@@ -37,7 +37,6 @@
   </div>
 </template>
 <script>
- import {getSavePassword} from "../../apis"
 
 export default {
   data() {
@@ -101,40 +100,41 @@ export default {
   methods: {
     updatepwdForm() {
       this.$refs.updateForm.validate(async valid => {
-        if (valid) {
-          let params = {
-            oldpwd : this.updateForm.oldpwd,
-            newpwd: this.updateForm.newpwd
-          };
-
-          //发送请求给后端 把新旧密码发给后端
-     
-     let res = await  getSavePassword(params)
-          
-        
-              let { code ,msg} = res.data;
-              // 判断
-              if (code === 0) {
-                // 弹成功提示
-                this.$message({
-                  type: "success",
-                  message: "msg"
-                });
-                // 清除token
-                window.localStorage.removeItem("token");
-
-                setTimeout(() => {
-                  // 跳转到登录
-                  this.$router.push("/login");
-                }, 1000);
-              } else if (code === 1) {
-                this.$message.error('msg');
-              }
-            
-        } else {
+        if (!valid) {
           console.log("验证失败!");
           return false;
         }
+        let params = {
+          oldpwd : this.updateForm.oldpwd,
+          newpwd: this.updateForm.newpwd
+        };
+
+          //发送请求给后端 把新旧密码发给后端
+     
+         let res = await this.$api.login.updatePwd(params);
+         if (!res || !res.data) {
+            return  false;
+         }
+
+         let { code ,msg} = res.data;
+         if (code !== 0) {
+            this.$message.error(msg || '失败');
+             return false;
+          }
+
+          // 弹成功提示
+          this.$message({
+            type: "success",
+            message: msg || '成功'
+          });
+
+           // 清除token
+           window.localStorage.removeItem("token");
+
+            setTimeout(() => {
+              // 跳转到登录
+              this.$router.push("/login");
+            }, 1000);
       });
     }
   }
