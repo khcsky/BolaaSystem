@@ -47,10 +47,7 @@
               </el-row>
           </el-form>
         <Table :PorTableData="PorTableData" :colConfigs="colConfigs">
-            <!-- :activeSon="batchesdel"
-            <el-table-column slot="opt">
-                <el-button size="mini" slot-scope="{ row }">查看</el-button>
-            </el-table-column>-->
+    
             <el-table-column label="管理" slot="opt" >
                 <template slot-scope="scope" class="btn">
                     <!-- 编辑 -->
@@ -69,9 +66,7 @@
           :page.sync="listQuery.page"
           :limit.sync="listQuery.limit"
           @pagination="getList" />
-       <!--
-        <Dialogs :title="title" :accountEditForm="accountEditForm" :colConfigs="colConfigs" :dialogFormVisible="dialogFormVisible" :rules="rules"  ref="dialogs"></Dialogs>
-        -->
+       
           <!-- 模态框 -->
         <el-dialog width="500px" :title="title[edit]" :visible.sync="dialogFormVisible">
           <!-- 表格 -->
@@ -194,12 +189,27 @@
           if (isJSON(res.data)) {
           res.data = JSON.parse(res.data);
           }
+<<<<<<< HEAD
           if (res.data.code === 5001) {
           window.localStorage.removeItem('token');
           window.localStorage.removeItem('userId');
           window.localStorage.removeItem('username');
           this.$router.push('/login');
           return false;
+=======
+          if (isString(res.data)) {
+              res.data = res.data.replace(/'/g, '"');
+          }
+          if (isJSON(res.data)) {
+              res.data = JSON.parse(res.data);
+          }
+          if (res.data.code === 5001) {
+              window.localStorage.removeItem('token');
+              window.localStorage.removeItem('userId');
+              window.localStorage.removeItem('username');
+              this.$router.push('/login');
+              return false;
+>>>>>>> 72210059bb27566cc7f830d4ebf8849fe1f35879
           }
           let {code, page, data} = res.data;
           if (code === 5003) {
