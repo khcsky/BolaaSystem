@@ -46,7 +46,7 @@
                   </el-col>
               </el-row>
           </el-form>
-        <Table :PorTableData="PorTableData" :colConfigs="colConfigs" :activeSon="batchesdel">
+        <Table :PorTableData="PorTableData" :colConfigs="colConfigs">
             <!--<el-table-column slot="opt">
                 <el-button size="mini" slot-scope="{ row }">查看</el-button>
             </el-table-column>-->
