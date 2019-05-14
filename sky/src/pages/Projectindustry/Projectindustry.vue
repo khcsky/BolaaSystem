@@ -106,18 +106,14 @@
  import moment from "moment";
  import Table from "../../components/Table/Table"
  import Paging from "../../components/Paging/Paging"
- import {getRemoteList,getCollectList} from "../../apis"
+ import {isJSON, isString} from "../../utils/base"
 
  export default {
    data() {
      this.colDialog = [
          { prop: 'industryName', label: '行业名称' ,width:"70"},
-         
-         
      ];
      this.colConfigs = this.colDialog.concat([
-        
-        
          { slot: 'opt' }
          ])
      return {
@@ -169,20 +165,30 @@
           };
        
 
-          let res = await getCollectList(params);
+          let res = await this.$api.industry.getList(params);
           //容错
           if (!res || !res.data) {
-   
-                  return  false;
-              }
+             return  false;
+          }
+          if (isString(res.data)) {
+              res.data = res.data.replace(/'/g, '"');
+          }
+          if (isJSON(res.data)) {
+              res.data = JSON.parse(res.data);
+          }
+          if (res.data.code === 5001) {
+              window.localStorage.removeItem('token');
+              window.localStorage.removeItem('userId');
+              window.localStorage.removeItem('username');
+              this.$router.push('/login');
+              return false;
+          }
           let {code, page, data} = res.data;
           if (code !== 0) {
               console.log('错误');
               return false
           }
           try {
-            
-
               this.PorTableData = data
               this.total = page.pageTotal
 
@@ -209,24 +215,23 @@
         type: "warning"
       })
         .then(async () => {
-          let res = await delCollectList({ pid: row.pid });
+          let res = await this.$api.industry.update({ pid: row.pid });
           //容错
-                if (!res || !res.data) {
-          
-          return  false;
-         }
+          if (!res || !res.data) {
+            return  false;
+          }
           // 接收后端返回的数据
           let { code, msg } = res.data;
 
           if (code !== 0) {
-            this.$message.error(msg);
+            this.$message.error(msg || '失败');
             return false;
            }
 
           // 弹出成功提示
           this.$message({
             type: "success",
-            message: msg
+            message: msg || '成功'
           });
 
           // 刷新列表数据
@@ -255,45 +260,41 @@
       async saveEdit() {
        // 关闭模态框
         this.dialogFormVisible = false;
-        let params = Object.assign(this.accountEditForm, {pid: this.editId})
-        let res = await saveCollectList(params);
-              if (!res || !res.data) {
-              return  false;
-}
+        let params = this.edit === 1 ? Object.assign(this.accountEditForm, {pid: this.editId}) : this.accountEditForm;
+        Reflect.deleteProperty(params, 'time');
+        Reflect.deleteProperty(params, 'timeRange');
+        let res = this.edit === 1 ? await this.$api.industry.update(params) : await this.$api.industry.insert(params);
+        if (!res || !res.data) {
+          return  false;
+        }
         let { code, msg } = res.data;
         if (code !== 0) {
-          this.$message.error(msg);
+          this.$message.error(msg || '失败');
           return false;
         }
 
         // 弹出成功提示
         this.$message({
           type: "success",
-          message: msg
+          message: msg || '成功'
         });
-
-      
         // 刷新列表数据
         this.getList();
      },
-
-
-
     filterCtime(ctime) {
-      return moment(ctime).format("YYYY/MM/DD");
+      return [null, '', undefined].includes(ctime) ?  '' : moment(ctime).format("YYYY/MM/DD");
     },
     // 远程搜索
     async  remoteCategory (query = '') {
-      let res = await getRemoteList({keyword: query});
-        //容错
-                if (!res || !res.data) {
-            
-          return  false;
-         }
-      let {code, msg, data} = res.data
+      let res = await this.$api.industry.getRemoteList({keyword: query});
+      // 容错
+      if (!res || !res.data) {
+        return  false;
+      }
+      let {code, msg, data} = res.data;
       this.loading = true;
       if (code !== 0) {
-        this.$message.error(msg);
+        this.$message.error(msg || '失败');
         return false;
       }
       this.loading = false;
@@ -305,12 +306,6 @@
    this.getList();
    this.remoteCategory();
   },
-  //过滤器
-  filters: {
-    filterCtime(ctime) {
-       return moment(ctime).format("YYYY/MM/DD hh:mm:ss");
-    },
-  }
  }
 </script>
 

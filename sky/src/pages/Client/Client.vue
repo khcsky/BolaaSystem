@@ -173,23 +173,23 @@
               keyWord: this.searchForm.keyword ,
           };
           // sessionStorage.setItem('listQuery', JSON.stringify(this.listQuery));
-          let res = await this.$api.project.getList(params);
+          let res = await this.$api.client.getList(params);
 
           if (!res || !res.data) {
-          return  false;
+            return  false;
           }
           if (isString(res.data)) {
-          res.data = res.data.replace(/'/g, '"');
+            res.data = res.data.replace(/'/g, '"');
           }
           if (isJSON(res.data)) {
-          res.data = JSON.parse(res.data);
+            res.data = JSON.parse(res.data);
           }
           if (res.data.code === 5001) {
-          window.localStorage.removeItem('token');
-          window.localStorage.removeItem('userId');
-          window.localStorage.removeItem('username');
-          this.$router.push('/login');
-          return false;
+            window.localStorage.removeItem('token');
+            window.localStorage.removeItem('userId');
+            window.localStorage.removeItem('username');
+            this.$router.push('/login');
+            return false;
           }
           let {code, page, data} = res.data;
           if (code === 5003) {
@@ -200,8 +200,6 @@
               return false
           }
           try {
-          
-
               this.PorTableData = data;
               this.total = page.pageTotal;
 
@@ -228,7 +226,7 @@
          type: "warning"
       })
         .then(async () => {
-          let res = await this.$api.project.update({ pid: row.pid });
+          let res = await this.$api.client.update({ pid: row.pid });
           if (!res || !res.data) {
              return  false;
           }
@@ -282,7 +280,7 @@
         let params = this.edit === 1 ? Object.assign(this.accountEditForm, {pid: this.editId}) : this.accountEditForm;
         Reflect.deleteProperty(params, 'time');
         Reflect.deleteProperty(params, 'timeRange');
-        let res = this.edit === 1 ? await this.$api.project.update(params) : await this.$api.project.insert(params);
+        let res = this.edit === 1 ? await this.$api.client.update(params) : await this.$api.client.insert(params);
         if (!res || !res.data) {
            return  false;
         }
@@ -316,7 +314,7 @@
     },
     // 远程搜索
     async  remoteCategory (query = '') {
-      let res = await this.$api.project.getRemoteList({keyword: query});
+      let res = await this.$api.client.getRemoteList({keyword: query});
       if (!res || !res.data) {
           return  false;
       }

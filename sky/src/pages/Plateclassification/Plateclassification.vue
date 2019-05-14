@@ -185,7 +185,20 @@
 
           let res = await this.$api.collect.getList(params);
           if (!res || !res.data) {
-             return  false;
+              return  false;
+          }
+          if (isString(res.data)) {
+              res.data = res.data.replace(/'/g, '"');
+          }
+          if (isJSON(res.data)) {
+              res.data = JSON.parse(res.data);
+          }
+          if (res.data.code === 5001) {
+              window.localStorage.removeItem('token');
+              window.localStorage.removeItem('userId');
+              window.localStorage.removeItem('username');
+              this.$router.push('/login');
+              return false;
           }
           let {code, page, data} = res.data;
           if (code !== 0) {

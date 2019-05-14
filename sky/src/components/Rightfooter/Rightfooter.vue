@@ -11,11 +11,9 @@ export default {
 <style lang="less">
  .el-footer{
       border-top: 1px solid #ccc;
-      el-main
     .right-footer{
         color: #666;
        font-size:14px ;
-     
     }}
     
     

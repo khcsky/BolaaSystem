@@ -1,5 +1,5 @@
 <template>
-    <!--板块分类组件-->
+    <!--首页(项目)组件-->
     <div>
       <el-card class="box-card">
       <div slot="header" class="clearfix">
@@ -351,7 +351,7 @@
       let {code, msg, data} = res.data;
       this.loading = true;
       if (code !== 0) {
-        this.$message.error(msg);
+        this.$message.error(msg || '失败');
         return false;
       }
       this.loading = false;

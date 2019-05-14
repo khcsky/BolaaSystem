@@ -110,7 +110,7 @@
  import moment from "moment";
  import Table from "../../components/Table/Table"
  import Paging from "../../components/Paging/Paging"
- import {getCollectList, delCollectList, saveCollectList, getRemoteList} from "../../apis"
+ import {isJSON, isString} from "../../utils/base"
 
  export default {
    data() {
@@ -172,11 +172,10 @@
           };
           sessionStorage.setItem('listQuery', JSON.stringify(this.listQuery));
 
-          let res = await getCollectList(params);
+          let res = await this.$api.plate.getList(params);
           if (!res || !res.data) {  
               return  false;
-             }
-  
+          }
           if (isString(res.data)) {
               res.data = res.data.replace(/'/g, '"');
           }
@@ -221,16 +220,16 @@
         type: "warning"
       })
         .then(async () => {
-          let res = await delCollectList({ pid: row.pid });
+          let res = await this.$api.plate.update({ pid: row.pid });
            if (!res || !res.data) {
               return  false;
-             }
+           }
           // 接收后端返回的数据
           let { code, msg } = res.data;
 
           if (code !== 0) {
              this.$message.error(msg || '失败');
-            return false;
+             return false;
            }
 
           // 弹出成功提示
@@ -262,52 +261,50 @@
            return false;
        }
       this.edit = 1;
-       this.accountEditForm = row;
+      this.accountEditForm = row;
       // this.$refs.dialogs.handleEdit(); // 调用子组件的方法
       // 保存数据原来的id
        this.editId = row.pid;
        this.editRow = index
     
     },
-      //保存修改
-      async saveEdit() {
-       // 关闭模态框
-       this.dialogFormVisible = false;
+    //保存修改
+    async saveEdit() {
+        // 关闭模态框
+        this.dialogFormVisible = false;
         let params = this.edit === 1 ? Object.assign(this.accountEditForm, {pid: this.editId}) : this.accountEditForm;
         Reflect.deleteProperty(params, 'time');
         Reflect.deleteProperty(params, 'timeRange');
-        let res = this.edit === 1 ? await this.$api.project.update(params) : await this.$api.project.insert(params);
+
+        let res = this.edit === 1 ? await this.$api.plate.update(params) : await this.$api.plate.insert(params);
         if (!res || !res.data) {
            return  false;
         }
+
         let { code, msg } = res.data;
         if (code !== 0) {
           this.$message.error(msg || '失败');
           return false;
         }
+
         // 弹出成功提示
         this.$message({
           type: "success",
-        message: msg || "成功"
+          message: msg || "成功"
         });
-
-   
 
         // 刷新列表数据
         this.getList();
-     },
-    
-    
-
+    },
     filterCtime(ctime) {
         return [null, '', undefined].includes(ctime) ?  '' : moment(ctime).format("YYYY/MM/DD");
     },
     // 远程搜索
     async  remoteCategory (query = '') {
-      let res = await getRemoteList({keyword: query});
-       if (!res || !res.data) {
-              return  false;
-             }
+      let res = await this.$api.plate.getRemoteList({keyword: query});
+      if (!res || !res.data) {
+        return  false;
+      }
       let {code, msg, data} = res.data
       this.loading = true;
       if (code !== 0) {

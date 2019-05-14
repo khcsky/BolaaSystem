@@ -1,7 +1,7 @@
 <template>
     <div class="index">
         <el-container>
-          <el-aside width="240px">
+          <el-aside width="300px">
               <!-- 左侧导航栏 -->
               <Leftnav></Leftnav>
           </el-aside>  

@@ -27,17 +27,55 @@ const project = {
     }
 }
 
-// 客户管理
-const account = {
+// 行业管理
+const industry = {
+    getList (params) {
+        return axios.post(`project/findAll`, qs.stringify(params));
+    },
+    insert (params) {
+        return axios.get(`project/insert`, params);
+    },
+    update (params) {
+        return axios.get(`project/update`, params);
+    },
+    getRemoteList (params) {
+        return axios.post(`project/update`, qs.stringify(params));
+    }
+}
 
+// 客户管理
+const client = {
+    getList (params) {
+        return axios.post(`project/findAll`, qs.stringify(params));
+    },
+    insert (params) {
+        return axios.get(`project/insert`, params);
+    },
+    update (params) {
+        return axios.get(`project/update`, params);
+    },
+    getRemoteList (params) {
+        return axios.post(`project/update`, qs.stringify(params));
+    }
 }
 
 // 插件管理
-const commodity = {
-
+const plugin = {
+    getList (params) {
+        return axios.post(`project/findAll`, qs.stringify(params));
+    },
+    insert (params) {
+        return axios.get(`project/insert`, params);
+    },
+    update (params) {
+        return axios.get(`project/update`, params);
+    },
+    getRemoteList (params) {
+        return axios.post(`project/update`, qs.stringify(params));
+    }
 }
 
-// 采集管理
+// 板块采集管理
 const collect = {
     getList (params) {
         return axios.post(`project/findAll`, qs.stringify(params));
@@ -53,12 +91,31 @@ const collect = {
     }
 }
 
+// 板块分类管理
+const plate = {
+    getList (params) {
+        return axios.post(`project/findAll`, qs.stringify(params));
+    },
+    insert (params) {
+        return axios.get(`project/insert`, params);
+    },
+    update (params) {
+        return axios.get(`project/update`, params);
+    },
+    getRemoteList (params) {
+        return axios.post(`project/update`, qs.stringify(params));
+    }
+}
+
+
 export default {
     login,
     project,
-    account,
-    commodity,
+    industry,
+    client,
+    plugin,
     collect,
+    plate
 }
 
 // 采集管理 列表请求
