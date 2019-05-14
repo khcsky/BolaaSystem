@@ -107,7 +107,6 @@ const plate = {
     }
 }
 
-
 export default {
     login,
     project,
@@ -116,25 +115,5 @@ export default {
     plugin,
     collect,
     plate
-}
-
-// 采集管理 列表请求
-export function getCollectList (params) {
-    // return axios.post(`account/getList`, qs.stringify(params))
-}
-
-// 采集管理 删除
-export function delCollectList (params) {
-    // return axios.get(`account/delCollectList`, qs.stringify(params))
-}
-
-// 采集管理 编辑
-export function saveCollectList (params) {
-    // return axios.get(`account/saveCollectList`, qs.stringify(params))
-}
-
-// 采集管理 远程搜索
-export function getRemoteList (params) {
-    // return axios.get(`account/getRemoteList`, qs.stringify(params))
 }
 
