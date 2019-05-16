@@ -27,15 +27,15 @@
                        style="width:200px">
                         <el-option
                                 v-for="item in options"
-                                :key="item.value"
-                                :label="item.label"
-                                :value="item.value">
+                                :key="item.id"
+                                :label="`${item.serialNum}--${item.industryName}`"
+                                :value="item.id">
                         </el-option>
                     </el-select>
                   </el-col>
 
                   <el-col :span="5">
-                      <el-input v-model="searchForm.keyword" placeholder="请输入关键字"></el-input>
+                      <el-input v-model="searchForm.keyWord" placeholder="请输入关键字"></el-input>
                   </el-col>
 
                   <el-col :span="5">
@@ -92,6 +92,28 @@
                       start-placeholder="开始日期"
                       end-placeholder="结束日期">
                   </el-date-picker>
+                  <el-select
+                          v-else-if="prop === 'industry'"
+                          v-model="searchForm.category1"
+                          filterable
+                          remote
+                          reserve-keyword
+                          placeholder="---选择分类---"
+                          :remote-method="remoteCategory"
+                          style="width:200px">
+                      <el-option
+                              v-for="item in options"
+                              :key="item.id"
+                              :label="`${item.serialNum}--${item.industryName}`"
+                              :value="item.id">
+                      </el-option>
+                  </el-select>
+                  <el-radio-group  v-else-if="prop === 'status'" v-model="status">
+                      <el-radio v-if="edit === 0" :label="0" disabled>停用</el-radio>
+                      <el-radio v-else :label="0">停用</el-radio>
+                      <el-radio v-if="edit === 0" :label="1" checked>启用</el-radio>
+                      <el-radio v-else :label="1">启用</el-radio>
+                  </el-radio-group>
                   <el-input v-else v-model="accountEditForm[prop]" autocomplete="off"></el-input>
               </el-form-item>
           </el-form>
@@ -118,14 +140,15 @@
      this.colDialog = [
          { prop: 'pname', label: '项目名称' ,width:"70"},
          { prop: 'time', label: '起止时间' ,width:"200"},
-         { prop: 'industryId', label: '项目行业',width:"70" },
-         { prop: 'customerId', label: '客户名' ,width:"70"},
+         // { prop: 'industryId', label: '项目行业',width:"70" },
+         { prop: 'industry', label: '项目行业',width:"70" },
+         { prop: 'customerName', label: '客户名' ,width:"70"},
          { prop: 'status', label: '项目状态',width:"70" },
          
      ];
      this.colConfigs = this.colDialog.concat([
          { prop: 'stopTime', label: '停止时间',width:"120" },
-         { prop: 'userId', label: '操作人' ,width:"70"},
+         { prop: 'username', label: '操作人' ,width:"70"},
          { prop: 'operateTime', label: '操作时间' ,width:"120"},
          { prop: 'remark', label: '备注', width:"120"},
          { slot: 'opt' }
@@ -140,19 +163,20 @@
         ]
       },
      searchForm: {
-         category: "",
-         keyword: ""
+         category: '',
+         category1: '',
+         keyWord: ""
      },
-      // 项目列表数据
-      PorTableData: [],
+      PorTableData: [],  // 项目列表数据
       dialogFormVisible: false, // 控制模态框显示和隐藏
       accountEditForm: {
         // 修改表单的数据
-          pname: "",
-          time: "",
-          industryId: "",
-          customerId: "",
-          status: ""
+          "projectIndustryName": '',
+          "pname": "",
+          "time": "",
+          "industry": "",
+          "customerName": "",
+          "status": ""
       },
       formLabelWidth: "100px",
       editId: 0, // 需要修改的数据的id
@@ -164,9 +188,11 @@
          limit: 3 //每页多少条数据
       },
       options: [], // 远程搜索
+      updateOptions: [], //
       loading: false,
-      edit: 1,
-      title: ['添加', '编辑']
+      edit: 1, // 1:编辑 0:添加
+      title: ['添加', '编辑'],
+      status: 0 // 状态
      };
    },
    components: {
@@ -179,11 +205,10 @@
           const params = {
               page: this.listQuery.page,
               rows:  this.listQuery.limit,
-              //category: this.searchForm.category,
-              keyWord: this.searchForm.keyword ,
+              // category: this.searchForm.category,
           };
           // sessionStorage.setItem('listQuery', JSON.stringify(this.listQuery));
-          let res = await this.$api.project.getList(params);
+          let res = await this.$api.project.getList({page: params, keyWord: this.searchForm.keyWord});
           if (!res || !res.data) {
               return  false;
           }
@@ -203,12 +228,19 @@
           let {code, page, data} = res.data;
           if (code === 5003) {
             window.localStorage.setItem('token', res.data.token);
+            this.getList();
+            return false;
           }
-          if (code !== 0 && code !== 5003) {
+          if (code !== 0) {
               console.log('错误');
               return false
           }
           try {
+              this.total = page.totalRows;
+              if ([null, '', undefined].includes(data) || data.length === 0) {
+                 return false;
+              }
+
               data.map((v, i) => {
                   data[i]['time'] = this.filterCtime(v.startTime) + '至' + this.filterCtime(v.startTime);
                   data[i]['timeRange'] = [this.filterCtime(v.startTime), this.filterCtime(v.startTime)];
@@ -216,13 +248,16 @@
                   data[i]['endTime'] = this.filterCtime(v.endTime);
                   data[i]['stopTime'] = this.filterCtime(v.stopTime);
                   data[i]['operateTime'] = this.filterCtime(v.operateTime);
+                  data[i]['status'] = ['停用', '启用'][v.status];
+                  data[i]['username'] = v.user.username;
+                  data[i]['industry'] = v.projectIndustry.serialNum + '---' + v.projectIndustry.industryName;
+
                   if (this.filterCtime(v.startTime) === '' ||  this.filterCtime(v.startTime) === '') {
                       data[i]['time'] = '';
                   }
               });
 
               this.PorTableData = data;
-              this.total = page.pageTotal;
 
               // 如果数据为空 （优化 当当前页码数据为空 跳转到上一页）
               if (!data && this.listQuery.page !== 1) {
@@ -282,15 +317,20 @@
        this.dialogFormVisible = true;
        if (Object.keys(row).length === 0 || index === -1) {
           this.edit = 0;
-          Object.keys(this.accountEditForm).forEach(i => {
-              Reflect.set(this.accountEditForm, i, '');
+          this.status = 1;
+          Object.keys(this.accountEditForm).forEach((i, val) => {
+              val =  ['projectIndustry'].includes(val) ? val : i === 'status' ?  0 : '';
+              Reflect.set(this.accountEditForm, i, val);
           });
           return false;
        }
        this.edit = 1;
+       this.status = 0;
        this.accountEditForm = row;
+
       // this.$refs.dialogs.handleEdit(); // 调用子组件的方法
       // 保存数据原来的id
+       this.searchForm.category1 = row.projectIndustry.id;
        this.editId = row.pid;
        this.editRow = index
     },
@@ -298,9 +338,38 @@
       async saveEdit() {
        // 关闭模态框
         this.dialogFormVisible = false;
+        // let params = {
+        //     category: this.accountEditForm.category1,
+        //     keyWord: this.accountEditForm.keyWord
+        // };
+        // if (this.edit === 1) {
+        //     params.pid = this.editId;
+        // }
         let params = this.edit === 1 ? Object.assign(this.accountEditForm, {pid: this.editId}) : this.accountEditForm;
+        // console.log( params.time)
+        // console.log( params.timeRange)
+        if (this.edit === 0) {
+            params.startTime = this.filterCtime(new Date(this.accountEditForm.timeRange[0]));
+            params.endTime = this.filterCtime(new Date(this.accountEditForm.timeRange[1]));
+        }
         Reflect.deleteProperty(params, 'time');
         Reflect.deleteProperty(params, 'timeRange');
+
+        params.status = this.status;
+        this.options.map(it => {
+            if (it.id === this.searchForm.category1) {
+                params.projectIndustry = it;
+            }
+        });
+          params.endTime = params.endTime + ' 00:00:00';
+          params.startTime = params.startTime + ' 00:00:00';
+        // delete params.endTime;
+        // delete params.startTime;
+        delete params.stopTime;
+        delete params.operateTime;
+        console.log(params);
+
+
         let res = this.edit === 1 ? await this.$api.project.update(params) : await this.$api.project.insert(params);
         if (!res || !res.data) {
            return  false;
@@ -340,11 +409,11 @@
     },
 
     filterCtime(ctime) {
-      return [null, '', undefined].includes(ctime) ?  '' : moment(ctime).format("YYYY/MM/DD");
+      return [null, '', undefined].includes(ctime) ?  '' : moment(ctime).format("YYYY-MM-DD");
     },
     // 远程搜索
     async  remoteCategory (query = '') {
-      let res = await this.$api.project.getRemoteList({keyword: query});
+      let res = await this.$api.project.getRemoteList({nameOrNum: query});
       if (!res || !res.data) {
           return  false;
       }
@@ -356,12 +425,13 @@
       }
       this.loading = false;
       this.options = data;
+
     }
   },
   //生命周期钩子函数
-  created() {
-   this.getList();
-   this.remoteCategory();
+   async created() {
+     await this.remoteCategory();
+     await this.getList();
   },
  }
 </script>
