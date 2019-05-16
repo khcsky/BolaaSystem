@@ -4,7 +4,7 @@ import qs from 'qs'
 // 登陆
 const login = {
     login (params) {
-        return axios.post(`user/login`, qs.stringify(params));
+        return axios.post(`user/login`, params);
     },
     updatePwd (params) {
         return axios.post(`user/password`, qs.stringify(params));
@@ -14,16 +14,18 @@ const login = {
 // 项目管理
 const project = {
     getList (params) {
-        return axios.post(`project/findAll`, qs.stringify(params));
+        return axios.post(`project/findAll`, params);
     },
     insert (params) {
-        return axios.get(`project/insert`, params);
+        return axios.post(`project/insert`, params);
     },
     update (params) {
-        return axios.get(`project/update`, params);
+        return axios.post(`project/update`, params);
     },
     getRemoteList (params) {
-        return axios.post(`project/update`, qs.stringify(params));
+        const url  = params.nameOrNum === '' ? `projectIndustry/getProjectIndustryList` :
+            `projectIndustry/selectNameOrNum`;
+        return axios.post(url, params);
     }
 }
 

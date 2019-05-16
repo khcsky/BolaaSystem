@@ -24,8 +24,8 @@
                 </el-form-item>
 
                 <el-form-item>
-                    <el-button type="primary" @click="submitForm('ruleForm2')">提交</el-button>
-                    <el-button @click="resetForm('ruleForm2')">重置</el-button>
+                    <el-button type="primary" @click="submitForm('loginForm')">提交</el-button>
+                    <el-button @click="resetForm('loginForm')">重置</el-button>
                 </el-form-item>
             </el-form>
         </div>
@@ -41,7 +41,7 @@
                     return false;
                 }
                 if (value.length < 4 || value.length > 12) {
-                    callback(new Error('长度在 4 到 12 个字符' +value));
+                    callback(new Error('长度在 4 到 12 个字符'));
                     return false;
                 }
 
@@ -70,7 +70,6 @@
                     ],
                     // 密码验证
                     password:[
-
                         { required: true, validator: validatePwd,  trigger: 'blur' } // 自定义验证规则
                     ],
                     checkPass:[

@@ -81,8 +81,8 @@ const instance = axios.create({
   baseURL:  location.protocol + '//172.16.60.64:80' + '/',
   headers: {
     'accept': 'application/json',
-   //  'Content-Type': 'application/json;charset=UTF-8',
-    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+    'Content-Type': 'application/json;charset=UTF-8',
+    // 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
   },
   withCredentials: true,
   crossDomain: true,

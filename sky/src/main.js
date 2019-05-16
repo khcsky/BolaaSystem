@@ -26,6 +26,24 @@ Vue.prototype.$api = api;
 
 Vue.config.productionTip = false
 
+// 路由守卫
+router.beforeEach((to, from, next) => {
+// 获取浏览器token
+  const token = window.localStorage.getItem('token')
+// 如果没有token
+  if (!token) {
+// 如果去的是登录
+    if (to.path === '/login') {
+      next(); // 放行
+    } else {
+// 否则 跳转到登录
+      next({path: '/login'})
+    }
+  } else {
+    next(); // 放行
+  }
+})
+
 new Vue({
   router,
   store,
