@@ -17,25 +17,7 @@
               size="small">
               <el-row type="flex" class="row-bg">
                   <el-col :span="5">
-                    <el-select
-                       v-model="searchForm.category"
-                       filterable
-                       remote
-                       reserve-keyword
-                       placeholder="---选择分类---"
-                       :remote-method="remoteCategory"
-                       style="width:200px">
-                        <el-option
-                                v-for="item in options"
-                                :key="item.value"
-                                :label="item.label"
-                                :value="item.value">
-                        </el-option>
-                    </el-select>
-                  </el-col>
-
-                  <el-col :span="5">
-                      <el-input v-model="searchForm.keyword" placeholder="请输入关键字"></el-input>
+                      <el-input v-model="searchForm.keyWord" placeholder="请输入关键字"></el-input>
                   </el-col>
                   <el-col :span="5">
                       <el-button type="success" @click="getList">查询</el-button>
@@ -46,9 +28,6 @@
               </el-row>
           </el-form>
         <Table :PorTableData="PorTableData" :colConfigs="colConfigs">
-            <!--<el-table-column slot="opt">
-                <el-button size="mini" slot-scope="{ row }">查看</el-button>
-            </el-table-column>-->
             <el-table-column label="管理" slot="opt" >
                 <template slot-scope="scope" class="btn">
                     <!-- 编辑 -->
@@ -67,9 +46,6 @@
           :page.sync="listQuery.page"
           :limit.sync="listQuery.limit"
           @pagination="getList" />
-       <!--
-        <Dialogs :title="title" :accountEditForm="accountEditForm" :colConfigs="colConfigs" :dialogFormVisible="dialogFormVisible" :rules="rules"  ref="dialogs"></Dialogs>
-        -->
           <!-- 模态框 -->
         <el-dialog width="500px" :title="title[edit]" :visible.sync="dialogFormVisible">
           <!-- 表格 -->
@@ -82,14 +58,17 @@
                   :label="label"
                   :label-width="formLabelWidth"
               >
-                  <el-date-picker
-                      v-if="prop == 'time'"
-                      v-model="accountEditForm['timeRange']"
-                      type="daterange"
-                      range-separator="至"
-                      start-placeholder="开始日期"
-                      end-placeholder="结束日期">
-                  </el-date-picker>
+                  <el-tooltip
+                      v-if="prop === 'name' && edit === 0"
+                      class="item"
+                      effect="dark"
+                      content="客户名添加后不能修改！"
+                      placement="top">
+                     <el-input v-model="accountEditForm[prop]" autocomplete="off"></el-input>
+                  </el-tooltip>
+                  <el-input v-else-if="prop === 'name' && edit === 1"
+                            v-model="accountEditForm[prop]"
+                            autocomplete="off" readonly></el-input>
                   <el-input v-else v-model="accountEditForm[prop]" autocomplete="off"></el-input>
               </el-form-item>
           </el-form>
@@ -117,12 +96,10 @@
          { prop: 'name', label: '客户名称' ,width:"120"},
          { prop: 'companyName', label: '公司名称' ,width:"120"},
          { prop: 'tel', label: '联系方式',width:"120" },
-        
-         
      ];
      this.colConfigs = this.colDialog.concat([
-        
-         ])
+       { slot: 'opt' }
+     ])
      return {
       rules: {
         //模态框验证
@@ -134,7 +111,7 @@
       },
      searchForm: {
          category: "",
-         keyword: ""
+         keyWord: ""
      },
       // 项目列表数据
       PorTableData: [],
@@ -167,13 +144,22 @@
        // 请求列表数据
       async getList () {
           const params = {
-              page: this.listQuery.page,
-              rows:  this.listQuery.limit,
-              //category: this.searchForm.category,
-              keyWord: this.searchForm.keyword ,
+              page: {
+                  page: this.listQuery.page,
+                  rows:  this.listQuery.limit,
+              },
+              keyWord: this.searchForm.keyWord,
+              // category: this.searchForm.category,
           };
           // sessionStorage.setItem('listQuery', JSON.stringify(this.listQuery));
           let res = await this.$api.client.getList(params);
+
+          // const params = {
+          //     page: this.listQuery.page,
+          //     rows:  this.listQuery.limit,
+          //     category: this.searchForm.category,
+          //     keyWord: this.searchForm.keyWord ,
+          // };
 
           if (!res || !res.data) {
             return  false;
@@ -194,8 +180,10 @@
           let {code, page, data} = res.data;
           if (code === 5003) {
             window.localStorage.setItem('token', res.data.token);
+            this.getList();
+            return false;
           }
-          if (code !== 0 && code !== 5003) {
+          if (code !== 0) {
               console.log('错误');
               return false
           }
@@ -226,7 +214,7 @@
          type: "warning"
       })
         .then(async () => {
-          let res = await this.$api.client.update({ pid: row.pid });
+          let res = await this.$api.client.delete({ id: row.id });
           if (!res || !res.data) {
              return  false;
           }
@@ -309,30 +297,36 @@
       this.selectedId = val.map(v => v.id);
     },
 
-    filterCtime(ctime) {
-      return [null, '', undefined].includes(ctime) ?  '' : moment(ctime).format("YYYY/MM/DD");
+    filterCtime(ctime, format = 'YYYY-MM-DD') {
+          return [null, '', undefined].includes(ctime) ?  '' : moment(ctime).format(format);
     },
     // 远程搜索
-    async  remoteCategory (query = '') {
-      let res = await this.$api.client.getRemoteList({keyword: query});
-      if (!res || !res.data) {
-          return  false;
-      }
-      let {code, msg, data} = res.data;
-      this.loading = true;
-      if (code !== 0) {
-        this.$message.error(msg || '成功');
-        return false;
-      }
-      this.loading = false;
-      this.options = data;
-    }
+    // async  remoteCategory (query = '') {
+    //   if (query === '') {
+    //     return false;
+    //   }
+    //
+    //   let res = await this.$api.client.getRemoteList({nameOrNum: query});
+    //   if (!res || !res.data) {
+    //       return  false;
+    //   }
+    //
+    //   let {code, msg, data} = res.data;
+    //   this.loading = true;
+    //
+    //   if (code !== 0) {
+    //     this.$message.error(msg || '失败');
+    //     return false;
+    //   }
+    //
+    //   this.loading = false;
+    //   this.options = data;
+    // }
   },
   //生命周期钩子函数
-  created() {
-   this.getList();
-   this.remoteCategory();
-  },
+  async created() {
+     await this.getList();
+  }
  
   
  }

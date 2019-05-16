@@ -86,7 +86,7 @@ const instance = axios.create({
   },
   withCredentials: true,
   crossDomain: true,
-  timeout: 1000 * 12
+  timeout: 1000 * 60
 });
 
 /**

@@ -108,12 +108,25 @@
                               :value="item.id">
                       </el-option>
                   </el-select>
-                  <el-radio-group  v-else-if="prop === 'status'" v-model="status">
+                 <!-- <el-radio-group  v-else-if="prop === 'status'" v-model="status">
                       <el-radio v-if="edit === 0" :label="0" disabled>停用</el-radio>
                       <el-radio v-else :label="0">停用</el-radio>
                       <el-radio v-if="edit === 0" :label="1" checked>启用</el-radio>
                       <el-radio v-else :label="1">启用</el-radio>
+                  </el-radio-group>-->
+                  <el-radio-group  v-else-if="prop === 'status' && edit === 1" v-model="status">
+                      <el-radio :label="0">停用</el-radio>
+                      <el-radio :label="1">启用</el-radio>
                   </el-radio-group>
+                  <el-input  v-else-if="prop === 'status' && edit === 0"
+                             v-model="accountEditForm[prop]"
+                             autocomplete="off"
+                             readonly></el-input>
+                  <el-input v-else-if="prop === 'remark'"
+                            type="textarea"
+                            :rows="5"
+                            v-model="accountEditForm[prop]"
+                            autocomplete="off"></el-input>
                   <el-input v-else v-model="accountEditForm[prop]" autocomplete="off"></el-input>
               </el-form-item>
           </el-form>
@@ -153,6 +166,7 @@
          { prop: 'remark', label: '备注', width:"120"},
          { slot: 'opt' }
       ]);
+       this.colDialog.push({ prop: 'remark', label: '备注'})
      return {
       rules: {
         //模态框验证
@@ -203,12 +217,16 @@
        // 请求列表数据
       async getList () {
           const params = {
-              page: this.listQuery.page,
-              rows:  this.listQuery.limit,
+              page: {
+                  page: this.listQuery.page,
+                  rows:  this.listQuery.limit,
+              },
+              keyWord: this.searchForm.keyWord,
+              queryTime: ''
               // category: this.searchForm.category,
           };
           // sessionStorage.setItem('listQuery', JSON.stringify(this.listQuery));
-          let res = await this.$api.project.getList({page: params, keyWord: this.searchForm.keyWord});
+          let res = await this.$api.project.getList(params);
           if (!res || !res.data) {
               return  false;
           }
@@ -242,10 +260,12 @@
               }
 
               data.map((v, i) => {
-                  data[i]['time'] = this.filterCtime(v.startTime) + '至' + this.filterCtime(v.startTime);
-                  data[i]['timeRange'] = [this.filterCtime(v.startTime), this.filterCtime(v.startTime)];
-                  data[i]['startTime'] = this.filterCtime(v.startTime);
-                  data[i]['endTime'] = this.filterCtime(v.endTime);
+                  v.startTime = this.filterCtime(v.startTime);
+                  v.endTime = this.filterCtime(v.endTime);
+                  data[i]['time'] = v.startTime + '至' + v.endTime;
+                  data[i]['timeRange'] = [v.startTime, v.endTime];
+                  data[i]['startTime'] = v.startTime;
+                  data[i]['endTime'] = v.endTime;
                   data[i]['stopTime'] = this.filterCtime(v.stopTime);
                   data[i]['operateTime'] = this.filterCtime(v.operateTime);
                   data[i]['status'] = ['停用', '启用'][v.status];
@@ -282,7 +302,7 @@
          type: "warning"
       })
         .then(async () => {
-          let res = await this.$api.project.update({ pid: row.pid });
+          let res = await this.$api.project.delete({ pid: row.pid });
           if (!res || !res.data) {
              return  false;
           }
@@ -306,7 +326,7 @@
         .catch(() => {
           // 取消
           this.$message({
-            //type: "info",
+            type: "info",
             message: "已取消删除"
           });
         });
@@ -318,14 +338,19 @@
        if (Object.keys(row).length === 0 || index === -1) {
           this.edit = 0;
           this.status = 1;
+          this.searchForm.category1 = '';
           Object.keys(this.accountEditForm).forEach((i, val) => {
-              val =  ['projectIndustry'].includes(val) ? val : i === 'status' ?  0 : '';
+              // val = ['projectIndustry'].includes(val) ? val : i === 'status' ?  0 : '';
+              val = i === 'status' ?  0 : '';
               Reflect.set(this.accountEditForm, i, val);
           });
           return false;
        }
        this.edit = 1;
        this.status = 0;
+       Reflect.deleteProperty(row, 'stopTime');
+       Reflect.deleteProperty(row, 'operateTime');
+       Reflect.deleteProperty(row, 'industry');
        this.accountEditForm = row;
 
       // this.$refs.dialogs.handleEdit(); // 调用子组件的方法
@@ -338,20 +363,11 @@
       async saveEdit() {
        // 关闭模态框
         this.dialogFormVisible = false;
-        // let params = {
-        //     category: this.accountEditForm.category1,
-        //     keyWord: this.accountEditForm.keyWord
-        // };
-        // if (this.edit === 1) {
-        //     params.pid = this.editId;
-        // }
         let params = this.edit === 1 ? Object.assign(this.accountEditForm, {pid: this.editId}) : this.accountEditForm;
-        // console.log( params.time)
-        // console.log( params.timeRange)
-        if (this.edit === 0) {
-            params.startTime = this.filterCtime(new Date(this.accountEditForm.timeRange[0]));
-            params.endTime = this.filterCtime(new Date(this.accountEditForm.timeRange[1]));
-        }
+
+        params.startTime = this.filterCtime(new Date(this.accountEditForm.timeRange[0]), 'YYYY-MM-DD HH:mm:ss');
+        params.endTime = this.filterCtime(new Date(this.accountEditForm.timeRange[1]), 'YYYY-MM-DD HH:mm:ss');
+
         Reflect.deleteProperty(params, 'time');
         Reflect.deleteProperty(params, 'timeRange');
 
@@ -361,14 +377,7 @@
                 params.projectIndustry = it;
             }
         });
-          params.endTime = params.endTime + ' 00:00:00';
-          params.startTime = params.startTime + ' 00:00:00';
-        // delete params.endTime;
-        // delete params.startTime;
-        delete params.stopTime;
-        delete params.operateTime;
         console.log(params);
-
 
         let res = this.edit === 1 ? await this.$api.project.update(params) : await this.$api.project.insert(params);
         if (!res || !res.data) {
@@ -407,9 +416,8 @@
       // // val就是选中的数据 把选中数据的id取出来 放在一个数组中
       this.selectedId = val.map(v => v.id);
     },
-
-    filterCtime(ctime) {
-      return [null, '', undefined].includes(ctime) ?  '' : moment(ctime).format("YYYY-MM-DD");
+    filterCtime(ctime, format = 'YYYY-MM-DD') {
+      return [null, '', undefined].includes(ctime) ?  '' : moment(ctime).format(format);
     },
     // 远程搜索
     async  remoteCategory (query = '') {
