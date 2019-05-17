@@ -1,5 +1,5 @@
 import axios from './http' // 导入http中创建的axios实例
-import qs from 'qs'
+// import qs from 'qs'
 
 // getList: 列表请求
 // add: 添加
@@ -13,7 +13,7 @@ const login = {
         return axios.post(`user/login`, params);
     },
     updatePwd (params) {
-        return axios.post(`user/password`, qs.stringify(params));
+        return axios.post(`user/password`, params);
     }
 }
 
@@ -42,17 +42,17 @@ const project = {
 // 行业管理
 const industry = {
     getList (params) {
-        return axios.post(`project/findAll`, qs.stringify(params));
+        return axios.post(`projectIndustry/getProjectIndustryList`, params);
     },
     insert (params) {
-        return axios.get(`project/insert`, params);
+        return axios.post(`projectIndustry/insert`, params);
     },
     update (params) {
-        return axios.get(`project/update`, params);
+        return axios.post(`projectIndustry/update`, params);
     },
-    getRemoteList (params) {
-        return axios.post(`project/update`, qs.stringify(params));
-    }
+    // getRemoteList (params) {
+    //     return axios.post(`projectIndustry/update`, params);
+    // }
 }
 
 // 客户管理
@@ -69,57 +69,57 @@ const client = {
     delete (params) {
         return axios.post(`customer/delete`, params);
     },
-    getRemoteList (params) {
-        return axios.post( `customer/selectNameOrNum`, params);
-    }
+    // getRemoteList (params) {
+    //     return axios.post( `customer/selectNameOrNum`, params);
+    // }
 }
 
 // 插件管理
 const plugin = {
     getList (params) {
-        return axios.post(`project/findAll`, qs.stringify(params));
+        return axios.post(`plug/getPlugList`, params);
     },
     insert (params) {
-        return axios.get(`project/insert`, params);
+        return axios.post(`plug/insert`, params);
     },
     update (params) {
-        return axios.get(`project/update`, params);
+        return axios.post(`plug/update`, params);
     },
-    getRemoteList (params) {
-        return axios.post(`project/update`, qs.stringify(params));
-    }
 }
 
 // 板块采集管理
 const collect = {
     getList (params) {
-        return axios.post(`project/findAll`, qs.stringify(params));
+        return axios.post(`plategather/getPlateGatherList`, params);
     },
     insert (params) {
-        return axios.get(`project/insert`, params);
+        return axios.post(`plategather/insert`, params);
     },
     update (params) {
-        return axios.get(`project/update`, params);
+        return axios.post(`plategather/update`, params);
     },
+    // delete (params) {
+    //     return axios.post(`plategather/delete`, params);
+    // },
     getRemoteList (params) {
-        return axios.post(`project/update`, qs.stringify(params));
+        const url  = params.nameOrNum === '' ? `plateIndustry/getPlateIndustryList` :
+            `plateIndustry/selectNameOrNum`;
+        params = params.nameOrNum === '' ?  {} : params;
+        return axios.post(url, params);
     }
 }
 
 // 板块分类管理
 const plate = {
     getList (params) {
-        return axios.post(`project/findAll`, qs.stringify(params));
+        return axios.post(`plateIndustry/getPlateIndustryList`, params);
     },
     insert (params) {
-        return axios.get(`project/insert`, params);
+        return axios.post(`plateIndustry/insert`, params);
     },
     update (params) {
-        return axios.get(`project/update`, params);
+        return axios.post(`plateIndustry/update`, params);
     },
-    getRemoteList (params) {
-        return axios.post(`project/update`, qs.stringify(params));
-    }
 }
 
 export default {

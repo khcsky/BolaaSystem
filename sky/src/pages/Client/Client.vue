@@ -69,7 +69,7 @@
                   <el-input v-else-if="prop === 'name' && edit === 1"
                             v-model="accountEditForm[prop]"
                             autocomplete="off" readonly></el-input>
-                  <el-input v-else v-model="accountEditForm[prop]" autocomplete="off"></el-input>
+                  <el-input v-else v-model="accountEditForm[prop]" autocomplete="off" clearable></el-input>
               </el-form-item>
           </el-form>
 
@@ -92,47 +92,45 @@
 
  export default {
    data() {
+      // 模态框列
      this.colDialog = [
          { prop: 'name', label: '客户名称' ,width:"120"},
          { prop: 'companyName', label: '公司名称' ,width:"120"},
          { prop: 'tel', label: '联系方式',width:"120" },
      ];
+     // 数据表格列
      this.colConfigs = this.colDialog.concat([
        { slot: 'opt' }
-     ])
+     ]);
      return {
       rules: {
         //模态框验证
-        // 用户名
-        account: [
-          { required: true, message: "请输入账号", trigger: "blur" }, // 非空验证
-          { min: 3, max: 5, message: "账号长度在 3 到 5 位" } // 长度验证
-        ]
+          name: { required: true, message: "请输入客户名称", trigger: "blur" },
+          companyName:{ required: true, message: "请输入公司名称", trigger: "blur" },
+          tel: [
+              {required: true, message: '请输入联系方式', trigger: 'blur'},
+              {pattern: /^1[34578]\d{9}$/, message: '联系方式格式错误'}
+          ]
       },
-     searchForm: {
-         category: "",
-         keyWord: ""
-     },
-      // 项目列表数据
-      PorTableData: [],
+     searchForm: {keyWord: ""},
+      PorTableData: [], // 项目列表数据
       dialogFormVisible: false, // 控制模态框显示和隐藏
+      // 修改表单的数据
       accountEditForm: {
-        // 修改表单的数据
-          pid: "",
-          pnamepname: ""
+          name: "",
+          companyName: "",
+          tel: "",
       },
       formLabelWidth: "100px",
       editId: 0, // 需要修改的数据的id
       editRow: 0, //选中行下标
-      selectedId: [], // 选中的id数组
-      total: 10,
+      total: 0, // 总条数
       listQuery: {
          page: 1, //当前默认页
          limit: 3 //每页多少条数据
       },
-      options: [], // 远程搜索
       loading: false,
-      edit: 1,
+      edit: 1, // 1: 编辑 0:添加
       title: ['添加', '编辑']
      };
    },
@@ -149,18 +147,8 @@
                   rows:  this.listQuery.limit,
               },
               keyWord: this.searchForm.keyWord,
-              // category: this.searchForm.category,
           };
-          // sessionStorage.setItem('listQuery', JSON.stringify(this.listQuery));
           let res = await this.$api.client.getList(params);
-
-          // const params = {
-          //     page: this.listQuery.page,
-          //     rows:  this.listQuery.limit,
-          //     category: this.searchForm.category,
-          //     keyWord: this.searchForm.keyWord ,
-          // };
-
           if (!res || !res.data) {
             return  false;
           }
@@ -178,18 +166,22 @@
             return false;
           }
           let {code, page, data} = res.data;
+
+          // token过期
           if (code === 5003) {
             window.localStorage.setItem('token', res.data.token);
             this.getList();
             return false;
           }
+
+          // 请求错误
           if (code !== 0) {
               console.log('错误');
               return false
           }
           try {
               this.PorTableData = data;
-              this.total = page.pageTotal;
+              this.total = page.totalRows;
 
               // 如果数据为空 （优化 当当前页码数据为空 跳转到上一页）
               if (!data && this.listQuery.page !== 1) {
@@ -238,7 +230,7 @@
         .catch(() => {
           // 取消
           this.$message({
-            //type: "info",
+            type: "info",
             message: "已取消删除"
           });
         });
@@ -258,20 +250,23 @@
        this.accountEditForm = row;
       // this.$refs.dialogs.handleEdit(); // 调用子组件的方法
       // 保存数据原来的id
-       this.editId = row.pid;
+       this.editId = row.id;
        this.editRow = index
     },
       //保存修改
       async saveEdit() {
        // 关闭模态框
         this.dialogFormVisible = false;
-        let params = this.edit === 1 ? Object.assign(this.accountEditForm, {pid: this.editId}) : this.accountEditForm;
+        let params = this.edit === 1 ? Object.assign(this.accountEditForm, {id: this.editId}) : this.accountEditForm;
+
         Reflect.deleteProperty(params, 'time');
         Reflect.deleteProperty(params, 'timeRange');
+
         let res = this.edit === 1 ? await this.$api.client.update(params) : await this.$api.client.insert(params);
         if (!res || !res.data) {
            return  false;
         }
+
         let { code, msg } = res.data;
         if (code !== 0) {
           this.$message.error(msg || '失败');
@@ -299,33 +294,11 @@
 
     filterCtime(ctime, format = 'YYYY-MM-DD') {
           return [null, '', undefined].includes(ctime) ?  '' : moment(ctime).format(format);
-    },
-    // 远程搜索
-    // async  remoteCategory (query = '') {
-    //   if (query === '') {
-    //     return false;
-    //   }
-    //
-    //   let res = await this.$api.client.getRemoteList({nameOrNum: query});
-    //   if (!res || !res.data) {
-    //       return  false;
-    //   }
-    //
-    //   let {code, msg, data} = res.data;
-    //   this.loading = true;
-    //
-    //   if (code !== 0) {
-    //     this.$message.error(msg || '失败');
-    //     return false;
-    //   }
-    //
-    //   this.loading = false;
-    //   this.options = data;
-    // }
+    }
   },
   //生命周期钩子函数
-  async created() {
-     await this.getList();
+  created() {
+    this.getList();
   }
  
   

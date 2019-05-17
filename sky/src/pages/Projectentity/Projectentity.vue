@@ -94,7 +94,7 @@
                   </el-date-picker>
                   <el-select
                           v-else-if="prop === 'industry'"
-                          v-model="searchForm.category1"
+                          v-model="searchForm.categoryDialog"
                           filterable
                           remote
                           reserve-keyword
@@ -108,12 +108,6 @@
                               :value="item.id">
                       </el-option>
                   </el-select>
-                 <!-- <el-radio-group  v-else-if="prop === 'status'" v-model="status">
-                      <el-radio v-if="edit === 0" :label="0" disabled>停用</el-radio>
-                      <el-radio v-else :label="0">停用</el-radio>
-                      <el-radio v-if="edit === 0" :label="1" checked>启用</el-radio>
-                      <el-radio v-else :label="1">启用</el-radio>
-                  </el-radio-group>-->
                   <el-radio-group  v-else-if="prop === 'status' && edit === 1" v-model="status">
                       <el-radio :label="0">停用</el-radio>
                       <el-radio :label="1">启用</el-radio>
@@ -153,7 +147,6 @@
      this.colDialog = [
          { prop: 'pname', label: '项目名称' ,width:"70"},
          { prop: 'time', label: '起止时间' ,width:"200"},
-         // { prop: 'industryId', label: '项目行业',width:"70" },
          { prop: 'industry', label: '项目行业',width:"70" },
          { prop: 'customerName', label: '客户名' ,width:"70"},
          { prop: 'status', label: '项目状态',width:"70" },
@@ -168,23 +161,20 @@
       ]);
        this.colDialog.push({ prop: 'remark', label: '备注'})
      return {
+      //模态框验证
       rules: {
-        //模态框验证
-        // 用户名
-        account: [
-          { required: true, message: "请输入账号", trigger: "blur" }, // 非空验证
-          { min: 3, max: 5, message: "账号长度在 3 到 5 位" } // 长度验证
-        ]
+          pname:{ required: true, message: "请输入项目名称", trigger: "blur" },
+          customerName:{ required: true, message: "请输入项目行业", trigger: "blur" }
       },
      searchForm: {
-         category: '',
-         category1: '',
-         keyWord: ""
+         category: '', // 查询项目行业类型
+         categoryDialog: '', // 模态框项目行业类型
+         keyWord: "" // 查询关键字
      },
       PorTableData: [],  // 项目列表数据
       dialogFormVisible: false, // 控制模态框显示和隐藏
+      // 修改表单的数据
       accountEditForm: {
-        // 修改表单的数据
           "projectIndustryName": '',
           "pname": "",
           "time": "",
@@ -196,13 +186,12 @@
       editId: 0, // 需要修改的数据的id
       editRow: 0, //选中行下标
       selectedId: [], // 选中的id数组
-      total: 10,
+      total: 0,
       listQuery: {
          page: 1, //当前默认页
          limit: 3 //每页多少条数据
       },
       options: [], // 远程搜索
-      updateOptions: [], //
       loading: false,
       edit: 1, // 1:编辑 0:添加
       title: ['添加', '编辑'],
@@ -222,10 +211,8 @@
                   rows:  this.listQuery.limit,
               },
               keyWord: this.searchForm.keyWord,
-              queryTime: ''
-              // category: this.searchForm.category,
           };
-          // sessionStorage.setItem('listQuery', JSON.stringify(this.listQuery));
+
           let res = await this.$api.project.getList(params);
           if (!res || !res.data) {
               return  false;
@@ -244,18 +231,22 @@
               return false;
           }
           let {code, page, data} = res.data;
+
+          // token 过期
           if (code === 5003) {
             window.localStorage.setItem('token', res.data.token);
             this.getList();
             return false;
           }
+
+          // 请求错误
           if (code !== 0) {
               console.log('错误');
               return false
           }
           try {
               this.total = page.totalRows;
-              if ([null, '', undefined].includes(data) || data.length === 0) {
+              if ([null, '', undefined].includes(data)) {
                  return false;
               }
 
@@ -335,27 +326,26 @@
       handleEdit(row = {}, index = -1) {
       // 显示模态框
        this.dialogFormVisible = true;
+       // 添加
        if (Object.keys(row).length === 0 || index === -1) {
           this.edit = 0;
           this.status = 1;
-          this.searchForm.category1 = '';
+          this.searchForm.categoryDialog = '';
           Object.keys(this.accountEditForm).forEach((i, val) => {
               // val = ['projectIndustry'].includes(val) ? val : i === 'status' ?  0 : '';
-              val = i === 'status' ?  0 : '';
+              val = i === 'status' ?  '启用' : '';
               Reflect.set(this.accountEditForm, i, val);
           });
           return false;
        }
+       // 编辑
        this.edit = 1;
        this.status = 0;
-       Reflect.deleteProperty(row, 'stopTime');
-       Reflect.deleteProperty(row, 'operateTime');
-       Reflect.deleteProperty(row, 'industry');
        this.accountEditForm = row;
 
       // this.$refs.dialogs.handleEdit(); // 调用子组件的方法
       // 保存数据原来的id
-       this.searchForm.category1 = row.projectIndustry.id;
+       this.searchForm.categoryDialog = row.projectIndustry.id;
        this.editId = row.pid;
        this.editRow = index
     },
@@ -365,6 +355,10 @@
         this.dialogFormVisible = false;
         let params = this.edit === 1 ? Object.assign(this.accountEditForm, {pid: this.editId}) : this.accountEditForm;
 
+        if (!this.accountEditForm.timeRange ||
+           (this.accountEditForm.timeRange instanceof Array && this.accountEditForm.timeRange.length < 2)) {
+              this.accountEditForm.timeRange = ['', '']
+        }
         params.startTime = this.filterCtime(new Date(this.accountEditForm.timeRange[0]), 'YYYY-MM-DD HH:mm:ss');
         params.endTime = this.filterCtime(new Date(this.accountEditForm.timeRange[1]), 'YYYY-MM-DD HH:mm:ss');
 
@@ -373,11 +367,14 @@
 
         params.status = this.status;
         this.options.map(it => {
-            if (it.id === this.searchForm.category1) {
+            if (it.id === this.searchForm.categoryDialog) {
                 params.projectIndustry = it;
             }
         });
-        console.log(params);
+
+        Reflect.deleteProperty(params, 'stopTime');
+        Reflect.deleteProperty(params, 'operateTime');
+        Reflect.deleteProperty(params, 'industry');
 
         let res = this.edit === 1 ? await this.$api.project.update(params) : await this.$api.project.insert(params);
         if (!res || !res.data) {
@@ -407,15 +404,6 @@
         // 刷新列表数据
         this.getList();
      },
-    //取消选择
-    cancelselect() {
-      this.$refs.PorTableData.clearSelection(); // 整个表格调用取消选择方法
-    },
-    // 当选择项发生改变触发
-    handleSelectionChange(val) {
-      // // val就是选中的数据 把选中数据的id取出来 放在一个数组中
-      this.selectedId = val.map(v => v.id);
-    },
     filterCtime(ctime, format = 'YYYY-MM-DD') {
       return [null, '', undefined].includes(ctime) ?  '' : moment(ctime).format(format);
     },
@@ -425,22 +413,30 @@
       if (!res || !res.data) {
           return  false;
       }
+
       let {code, msg, data} = res.data;
+
       this.loading = true;
+
       if (code !== 0) {
         this.$message.error(msg || '失败');
         return false;
       }
+
       this.loading = false;
       this.options = data;
+
+      // if (query === '') {
+      //   this.searchForm.category = data[0]['id'];
+      // }
 
     }
   },
   //生命周期钩子函数
-   async created() {
-     await this.remoteCategory();
-     await this.getList();
-  },
+   created() {
+     this.remoteCategory();
+     this.getList();
+   },
  }
 </script>
 
