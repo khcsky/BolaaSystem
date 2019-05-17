@@ -158,7 +158,7 @@
               window.localStorage.removeItem('userId');
               window.localStorage.removeItem('username');
           }
-          let {code, page, data} = res.data;
+          let {code, page, data, msg} = res.data;
           // token过期
           if (code === 5003) {
               window.localStorage.setItem('token', res.data.token);
@@ -167,7 +167,7 @@
           }
           // 请求错误
           if (code !== 0) {
-              console.log('错误');
+              console.log(msg || '错误');
               return false;
           }
           try {

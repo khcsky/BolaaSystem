@@ -96,10 +96,10 @@
                     if (!res || !res.data) {
                         return false;
                     }
-                    let {code, token, userId, username} = res.data;
+                    let {code, token, userId, username, msg} = res.data;
 
                     if (code !== 0) {
-                        this.$message.error('登陆失败');
+                        this.$message.error(msg || '登陆失败');
                         return  false;
                     }
 

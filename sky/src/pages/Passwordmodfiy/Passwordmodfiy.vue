@@ -17,15 +17,15 @@
         >
           <!--密码 -->
           <el-form-item label="原密码" prop="oldpwd">
-            <el-input type="text" v-model="updateForm.oldpwd" autocomplete="off"></el-input>
+            <el-input type="text" v-model="updateForm.oldpwd" autocomplete="off" clearable></el-input>
           </el-form-item>
 
           <el-form-item label="新密码" prop="newpwd">
-            <el-input type="password" v-model="updateForm.newpwd" autocomplete="off"></el-input>
+            <el-input type="password" v-model="updateForm.newpwd" autocomplete="off" clearable></el-input>
           </el-form-item>
 
           <el-form-item label="确认新密码" prop="checknewpwd">
-            <el-input type="password" v-model="updateForm.checknewpwd" autocomplete="off"></el-input>
+            <el-input type="password" v-model="updateForm.checknewpwd" autocomplete="off" clearable></el-input>
           </el-form-item>
 
           <el-form-item>
@@ -87,12 +87,17 @@ export default {
         checknewpwd: "" // 确认新密码
       },
       rules: {
-        oldpwd: [{ required: true, validator: oldpwd, trigger: "blur" }],
-
-        newpwd: [{ required: true, validator: newpwd, trigger: "blur" }],
-
+        oldpwd: [
+          {required: true, validator: oldpwd, trigger: "blur" },
+          { min: 6, max: 18, message: "长度在 6 到18 位" }
+        ],
+        newpwd: [
+          { required: true, validator: newpwd, trigger: "blur" },
+          { min: 6, max: 18, message: "长度在 6 到18 位" }
+        ],
         checknewpwd: [
-          { required: true, validator: checknewpwd, trigger: "blur" }
+          { required: true, validator: checknewpwd, trigger: "blur" },
+          { min: 6, max: 18, message: "长度在 6 到18 位" }
         ]
       }
     };
@@ -105,18 +110,23 @@ export default {
           return false;
         }
         let params = {
-          oldpwd : this.updateForm.oldpwd,
-          newpwd: this.updateForm.newpwd
+          oldPassword : this.updateForm.oldpwd,
+          newPassword: this.updateForm.newpwd,
+          affirmPassword: this.updateForm.checknewpwd,
         };
 
           //发送请求给后端 把新旧密码发给后端
-     
          let res = await this.$api.login.updatePwd(params);
          if (!res || !res.data) {
             return  false;
          }
 
          let { code ,msg} = res.data;
+        if (code === 5003) {
+          window.localStorage.setItem('token', res.data.token);
+          this.updatepwdForm();
+          return false;
+        }
          if (code !== 0) {
             this.$message.error(msg || '失败');
              return false;

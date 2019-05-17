@@ -12,7 +12,7 @@ const login = {
         return axios.post(`user/login`, params);
     },
     updatePwd (params) {
-        return axios.post(`user/password`, params);
+        return axios.post(`user/editPassword`, params);
     }
 }
 

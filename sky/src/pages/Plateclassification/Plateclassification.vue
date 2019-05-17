@@ -128,7 +128,7 @@
                             :rows="5"
                             v-model="accountEditForm[prop]"
                             autocomplete="off"></el-input>
-                  <el-input v-else v-model="accountEditForm[prop]" autocomplete="off"></el-input>
+                  <el-input v-else v-model="accountEditForm[prop]" autocomplete="off" clearable></el-input>
               </el-form-item>
           </el-form>
 
@@ -250,14 +250,14 @@
               this.$router.push('/login');
               return false;
           }
-          let {code, page, data} = res.data;
+          let {code, page, data, msg} = res.data;
           if (code === 5003) {
               window.localStorage.setItem('token', res.data.token);
               this.getList();
               return false;
           }
           if (code !== 0) {
-              console.log('错误');
+              console.log(msg || '错误');
               return false;
           }
           try {
