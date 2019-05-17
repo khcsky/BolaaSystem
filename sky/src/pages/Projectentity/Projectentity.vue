@@ -75,7 +75,7 @@
           <!-- 模态框 -->
         <el-dialog width="500px" :title="title[edit]" :visible.sync="dialogFormVisible">
           <!-- 表格 -->
-          <el-form :model="accountEditForm" prop="usergroup" :rules="rules" style="width: 320px;">
+          <el-form :model="accountEditForm" :rules="rules" style="width: 320px;">
             <!-- 表单 -->
               <el-form-item
                   v-for="{ prop, label } in colDialog"
