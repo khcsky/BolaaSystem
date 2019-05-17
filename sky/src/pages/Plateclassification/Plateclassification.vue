@@ -52,7 +52,7 @@
             </el-table-column>-->
             <el-table-column label="状态" slot="opt" >
                 <template slot-scope="scope" class="btn">
-                    <el-radio-group v-model="scope.row.status" @change="updateStatus(scope.row.status)">
+                    <el-radio-group v-model="scope.row.status" @change="updateStatus(scope.row.status, scope.row.id)">
                         <el-radio :label="0">停用</el-radio>
                         <el-radio :label="1">启用</el-radio>
                     </el-radio-group>
@@ -202,7 +202,7 @@
           url: "",
           gatherTime: "",
           netName: "",
-          status: "",
+          status: "启用",
           remark: "",
           industryStr: "",
       },
@@ -219,7 +219,6 @@
       loading: false,
       edit: 1,
       title: ['添加', '编辑'],
-      status: 0,
       plateSource: 1 // 板块来源
      };
    },
@@ -348,17 +347,15 @@
        if (Object.keys(row).length === 0 || index === -1) {
            this.edit = 0;
            this.plateSource = 1;
-           this.status = 1;
            this.searchForm.categoryDialog = '';
            Object.keys(this.accountEditForm).forEach((i, val) => {
-               val = i === 'status' ?  '启用' : i === 'plateSource' ?  1 : '';
+               val = i === 'status' ? '启用' : i === 'plateSource' ?  1 : '';
                Reflect.set(this.accountEditForm, i, val);
            });
            return false;
        }
        // 编辑
        this.edit = 1;
-       this.status = row.status === '启用' ? 1 : 0;
        this.plateSource = row.plateSource === '第三搜索' ? 1 : row.plateSource ==='自由搜索' ? 2 : 3;
        this.accountEditForm = row;
       // this.$refs.dialogs.handleEdit(); // 调用子组件的方法
@@ -386,15 +383,12 @@
         Reflect.deleteProperty(params, 'industryStr');
 
         params.plateSource = ['', '第三搜索', '自由搜索', '采集板块'][this.plateSource];
-        params.status = this.status;
+        this.edit === 0  ?  params.status = 1 : Reflect.deleteProperty(params, 'status');
         this.options.map(it => {
            if (it.id === this.searchForm.categoryDialog) {
              params.industry = it;
            }
         });
-        if (this.edit === 1) {
-            Reflect.deleteProperty(params, 'status');
-        }
 
         let res = this.edit === 1 ? await this.$api.collect.update(params) : await this.$api.collect.insert(params);
         if (!res || !res.data) {
@@ -445,23 +439,17 @@
       this.options = data;
     },
     // 更新状态
-    async updateStatus (status) {
-       const params = {status};
+    async updateStatus (status, id) {
+       const params = {status, id};
        let res = await this.$api.collect.updateStatus(params);
-       if (!res || !res.data) {
+       if (!res) {
          return  false;
        }
         let {code, msg} = res.data;
+
         this.loading = true;
-
-        // 请求失败
-        if (code !== 0) {
-            this.$message.error(msg　|| "失败");
-            return false;
-        }
-
+        code !== 0 ? this.$message.error(msg　|| "失败") : this.$message.success(msg　|| "成功");
         this.loading = false;
-        this.$message.success(msg　|| "成功");
         this.getList();
     }
   },
