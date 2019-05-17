@@ -340,7 +340,7 @@
        }
        // 编辑
        this.edit = 1;
-       this.status = 0;
+       this.status = row.status === '启用' ? 1 : 0;
        this.accountEditForm = row;
 
       // this.$refs.dialogs.handleEdit(); // 调用子组件的方法

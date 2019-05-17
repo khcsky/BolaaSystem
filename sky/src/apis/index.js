@@ -96,6 +96,9 @@ const collect = {
             `plateIndustry/selectNameOrNum`;
         params = params.nameOrNum === '' ?  {} : params;
         return axios.post(url, params);
+    },
+    updateStatus (params) {
+        return axios.post(`plategather/enableOrDisable`, params);
     }
 }
 

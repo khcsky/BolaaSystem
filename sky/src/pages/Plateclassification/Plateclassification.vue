@@ -50,6 +50,14 @@
             <!--<el-table-column slot="opt">
                 <el-button size="mini" slot-scope="{ row }">查看</el-button>
             </el-table-column>-->
+            <el-table-column label="状态" slot="opt" >
+                <template slot-scope="scope" class="btn">
+                    <el-radio-group v-model="scope.row.status" @change="updateStatus(scope.row.status)">
+                        <el-radio :label="0">停用</el-radio>
+                        <el-radio :label="1">启用</el-radio>
+                    </el-radio-group>
+                </template>
+            </el-table-column>
             <el-table-column label="管理" slot="opt" >
                 <template slot-scope="scope" class="btn">
                     <!-- 编辑 -->
@@ -75,6 +83,7 @@
             <!-- 表单 -->
               <el-form-item
                   v-for="{ prop, label } in colDialog"
+                  v-show="prop !== 'status' && edit === 1 || edit === 0"
                   :key="prop"
                   :prop="prop"
                   :label="label"
@@ -90,7 +99,7 @@
                   </el-date-picker>
                   <el-select
                           v-else-if="prop === 'industryStr'"
-                          v-model="searchForm.category1"
+                          v-model="searchForm.categoryDialog"
                           filterable
                           remote
                           reserve-keyword
@@ -114,10 +123,6 @@
                       <el-radio :label="1">第三搜索</el-radio>
                       <el-radio :label="2">自由搜索</el-radio>
                       <el-radio :label="3">采集板块</el-radio>
-                  </el-radio-group>
-                  <el-radio-group  v-else-if="prop === 'status' && edit === 1" v-model="status">
-                      <el-radio :label="0">停用</el-radio>
-                      <el-radio :label="1">启用</el-radio>
                   </el-radio-group>
                   <el-input  v-else-if="prop === 'status' && edit === 0"
                              v-model="accountEditForm[prop]"
@@ -160,16 +165,16 @@
          { prop: 'interval', label: '间隔时间' },
          { prop: 'gatherTime', label: '下次采集时间', width:"120" },
          { prop: 'netName', label: '站点名' },
-         { prop: 'status', label: '状态' },
      ];
      this.colConfigs = this.colDialog.concat([
          { prop: 'id', label: 'ID' },
-         // { prop: 'plugId', label: '插件名' },
          { prop: 'plugId', label: '插件Id' },
          { prop: 'remark', label: '备注' },
          { slot: 'opt' }
          ]);
+
      this.colDialog.push({ prop: 'remark', label: '备注'});
+     this.colDialog.push({ prop: 'status', label: '状态'});
      return {
       rules: {
         // 模态框验证
@@ -183,9 +188,9 @@
 
       },
      searchForm: {
-         category: "",
-         category1: "",
-         keyWord: "",
+         category: '', // 查询项目行业类型
+         categoryDialog: '', // 模态框项目行业类型
+         keyWord: "" // 查询关键字
      },
       // 项目列表数据
       PorTableData: [],
@@ -261,9 +266,6 @@
               return false;
           }
           try {
-            
-              // this.PorTableData = data;
-              // this.total = page.pageTotal;
               this.total = page.totalRows;
               if ([null, '', undefined].includes(data)) {
                   return false;
@@ -277,7 +279,7 @@
                   data[i]['startTime'] = v.startTime;
                   data[i]['endTime'] = v.endTime;
                   data[i]['gatherTime'] = this.filterCtime(v.gatherTime);
-                  data[i]['industryStr'] = v.industry.serialNum + '---' + v.industry.name;;
+                  data[i]['industryStr'] = v.industry.serialNum + '---' + v.industry.name;
 
                   if (this.filterCtime(v.startTime) === '' ||  this.filterCtime(v.startTime) === '') {
                       data[i]['time'] = '';
@@ -342,25 +344,26 @@
       handleEdit(row = {}, index = -1) {
       // 显示模态框
        this.dialogFormVisible = true;
+       // 添加
        if (Object.keys(row).length === 0 || index === -1) {
            this.edit = 0;
            this.plateSource = 1;
            this.status = 1;
-           this.searchForm.category1 = '';
+           this.searchForm.categoryDialog = '';
            Object.keys(this.accountEditForm).forEach((i, val) => {
                val = i === 'status' ?  '启用' : i === 'plateSource' ?  1 : '';
                Reflect.set(this.accountEditForm, i, val);
            });
-            console.log(this.accountEditForm);
            return false;
        }
+       // 编辑
        this.edit = 1;
-       this.status = 0;
-       // this.plateSource = 0;
+       this.status = row.status === '启用' ? 1 : 0;
+       this.plateSource = row.plateSource === '第三搜索' ? 1 : row.plateSource ==='自由搜索' ? 2 : 3;
        this.accountEditForm = row;
       // this.$refs.dialogs.handleEdit(); // 调用子组件的方法
       // 保存数据原来的id
-       this.searchForm.category1 = row.industry.id;
+       this.searchForm.categoryDialog = row.industry.id;
        this.editId = row.id;
        this.editRow = index
       
@@ -385,10 +388,13 @@
         params.plateSource = ['', '第三搜索', '自由搜索', '采集板块'][this.plateSource];
         params.status = this.status;
         this.options.map(it => {
-           if (it.id === this.searchForm.category1) {
+           if (it.id === this.searchForm.categoryDialog) {
              params.industry = it;
            }
         });
+        if (this.edit === 1) {
+            Reflect.deleteProperty(params, 'status');
+        }
 
         let res = this.edit === 1 ? await this.$api.collect.update(params) : await this.$api.collect.insert(params);
         if (!res || !res.data) {
@@ -428,7 +434,7 @@
       let res = await this.$api.collect.getRemoteList({nameOrNum: query});
       if (!res || !res.data) {
          return  false;
-}
+      }
       let {code, msg, data} = res.data;
       this.loading = true;
       if (code !== 0) {
@@ -437,6 +443,26 @@
       }
       this.loading = false;
       this.options = data;
+    },
+    // 更新状态
+    async updateStatus (status) {
+       const params = {status};
+       let res = await this.$api.collect.updateStatus(params);
+       if (!res || !res.data) {
+         return  false;
+       }
+        let {code, msg} = res.data;
+        this.loading = true;
+
+        // 请求失败
+        if (code !== 0) {
+            this.$message.error(msg　|| "失败");
+            return false;
+        }
+
+        this.loading = false;
+        this.$message.success(msg　|| "成功");
+        this.getList();
     }
   },
    created() {
