@@ -5,7 +5,8 @@ import axios from 'axios';
 import qs from 'qs';
 
 // 设置服务器基本路径
-axios.defaults.baseURL = 'http://127.0.0.1:5000';
+// axios.defaults.baseURL = 'http://127.0.0.1:5000';
+axios.defaults.baseURL = location.protocol + '//172.16.60.64:80';
 
 // 设置axios的请求拦截器（在发送所有请求之间 给请求头统一携带token）
 // axios.interceptors.request.use(config => {

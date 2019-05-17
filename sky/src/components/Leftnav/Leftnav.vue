@@ -36,7 +36,7 @@ export default {
                     icon_code:'&#xe641',
                     children: [
                         {
-                            path: '/index',
+                            path: '/',
                             subMenuTitle: '项目管理'
                         },
                         {
