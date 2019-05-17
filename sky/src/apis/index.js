@@ -1,5 +1,4 @@
 import axios from './http' // 导入http中创建的axios实例
-// import qs from 'qs'
 
 // getList: 列表请求
 // add: 添加
@@ -50,9 +49,6 @@ const industry = {
     update (params) {
         return axios.post(`projectIndustry/update`, params);
     },
-    // getRemoteList (params) {
-    //     return axios.post(`projectIndustry/update`, params);
-    // }
 }
 
 // 客户管理
@@ -69,9 +65,6 @@ const client = {
     delete (params) {
         return axios.post(`customer/delete`, params);
     },
-    // getRemoteList (params) {
-    //     return axios.post( `customer/selectNameOrNum`, params);
-    // }
 }
 
 // 插件管理
@@ -98,9 +91,6 @@ const collect = {
     update (params) {
         return axios.post(`plategather/update`, params);
     },
-    // delete (params) {
-    //     return axios.post(`plategather/delete`, params);
-    // },
     getRemoteList (params) {
         const url  = params.nameOrNum === '' ? `plateIndustry/getPlateIndustryList` :
             `plateIndustry/selectNameOrNum`;
