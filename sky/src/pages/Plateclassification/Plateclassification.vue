@@ -255,6 +255,15 @@
               return false;
           }
           let {code, page, data, msg} = res.data;
+
+          // token为空,跳转登录页面
+          if (code === 5002) {
+              this.$message.error(msg || '失败');
+              this.$router.push('/login');
+              return false;
+          }
+
+          // token过期
           if (code === 5003) {
               window.localStorage.setItem('token', res.data.token);
               this.getList();
