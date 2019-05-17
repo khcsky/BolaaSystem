@@ -62,7 +62,7 @@
                           effect="dark"
                           content="行业编号添加后不能修改！"
                           placement="top">
-                      <el-input v-model="accountEditForm[prop]" autocomplete="off"></el-input>
+                      <el-input v-model.number="accountEditForm[prop]" autocomplete="off"></el-input>
                   </el-tooltip>
                   <el-input v-else-if="prop === 'serialNum' && edit === 1"
                             v-model="accountEditForm[prop]"
@@ -99,10 +99,7 @@
      return {
       //模态框验证
       rules: {
-          serialNum: [
-              { required: true, message: "请输入行业编号", trigger: "blur" },
-              { pattern: /^\d$/, message: '请输入数字类型', trigger: ["blur", "input", "change"]},
-          ],
+          serialNum: { required: true, message: "请输入行业编号", trigger: "blur" },
           industryName:{ required: true, message: "请输入行业名称", trigger: "blur" }
       },
      searchForm: {

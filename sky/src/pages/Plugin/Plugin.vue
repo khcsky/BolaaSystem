@@ -207,6 +207,7 @@
        }
        // 编辑
        this.edit = 1;
+       this.agency = row.agency === '是' ? true : false;
        this.accountEditForm = row;
       // this.$refs.dialogs.handleEdit(); // 调用子组件的方法
       // 保存数据原来的id

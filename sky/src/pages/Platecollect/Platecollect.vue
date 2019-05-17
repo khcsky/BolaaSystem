@@ -61,7 +61,7 @@
                           effect="dark"
                           content="分类编号添加后不能修改！"
                           placement="top">
-                      <el-input v-model="accountEditForm[prop]" autocomplete="off"></el-input>
+                      <el-input v-model.number="accountEditForm[prop]" autocomplete="off" rules.serialNum = ''></el-input>
                   </el-tooltip>
                   <el-input v-else-if="prop === 'serialNum' && edit === 1"
                             v-model="accountEditForm[prop]"
@@ -98,10 +98,7 @@
      return {
        // 模态框验证
       rules: {
-          serialNum: [
-              { required: true, message: "请输入分类编号", trigger: "blur" },
-              { pattern: /^\d$/, message: '请输入数字类型', trigger: ["blur", "input", "change"]},
-          ],
+          serialNum: { required: true, message: "请输入分类编号", trigger: "blur" },
           name:{ required: true, message: "请输入分类名", trigger: "blur" }
       },
      searchForm: {
@@ -158,7 +155,15 @@
               window.localStorage.removeItem('userId');
               window.localStorage.removeItem('username');
           }
+
           let {code, page, data, msg} = res.data;
+
+          // token为空,跳转登录页面
+          if (code === 5002) {
+              this.$message.error(msg || '失败');
+              this.$router.push('/login');
+              return false;
+          }
           // token过期
           if (code === 5003) {
               window.localStorage.setItem('token', res.data.token);
